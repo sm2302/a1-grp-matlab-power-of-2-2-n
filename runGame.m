@@ -1,4 +1,9 @@
-function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0.1), numGens=Inf)
+function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, worldName='default', recordInterval = [-1 -1])
+
+  [grid, birth, life, startState, numGens, worldName recordInterval] = validateAndSetDefaultArgs(grid, birth, life, startState, numGens, worldName,  recordInterval);
+
+  lastSeed = startState;
+  save('lastSeed','lastSeed');
 
   % NOTE:
   %   Marker scale is just 1 for default figure size,
@@ -124,9 +129,9 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
     %   the arrangement of cells in the hexagonal and triangular grids
     daspect(aspectRatio);
 
-    title(sprintf(
-      '%dth generation - living: %d/%d',
-      gen, nCellsAlive, nCellsTotal));
+    title(strcat(worldName, sprintf(
+      ' - %dth generation - living: %d/%d',
+      gen, nCellsAlive, nCellsTotal)));
 
     % Axis numbers not required in this project
     axis off;
@@ -137,6 +142,19 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
     % Default vectors to be used for iterating through each cell
     rowRange = 2:numRows+1;
     colRange = 2:numCols+1;
+
+    drawnow;
+    frame = getframe(figure(1));
+    im = frame2im(frame);
+    filename = sprintf('%s.gif', worldName);
+    [A,map] = gray2ind(rgb2gray(im));
+    if gen == recordInterval(1)
+      imwrite(A,map,filename,"gif","LoopCount",Inf,"DelayTime",0.25);
+    elseif gen > recordInterval(1) && gen < recordInterval(2)
+      imwrite(A,map,filename,"gif","WriteMode","append","DelayTime",0.1);
+    elseif gen == recordInterval(2)
+        imwrite(A,map,filename,"gif","WriteMode","append","DelayTime",0.25);
+    end
 
     for r = rowRange
       if grid=='hex'
