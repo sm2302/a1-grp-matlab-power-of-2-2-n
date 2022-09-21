@@ -31,7 +31,24 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
   %
   %      numGens -- integer
   %                 - The number of total generations the game will run
+  %
+  %
+  % Default values (if left empty or set as negative):
+  %
+  %   arg \ grid | sqr          hex         tri       |
+  %   -----------|------------------------------------|
+  %   birth      | 3            [3 4]       2         |
+  %   life       | [2 3]        [2 3 4]     [1 2]     |
+  %   startState | 100,100,0.1  80,140,0.2  50,97,0.2 | (via. sprand)
+  %   numGens    | Inf          Inf         Inf       |
+
+
+  % Validate input args and assign default values where appropriate
+  %   Taking this portion of the code out of this function script keeps it neat
   [grid, birth, life, startState, numGens, worldName recordInterval] = validateAndSetDefaultArgs(grid, birth, life, startState, numGens, worldName,  recordInterval);
+
+  % Filename in case we save file to gif
+  filename = sprintf('%s.gif', worldName);
 
   % Save the seed in case we want to rerun the world.
   lastSeed = startState;
@@ -42,23 +59,28 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
   %   However, when the figure window is maximized, 2.5 is more suitable.
   markerScale = 1;
 
+
   % Extract the size of the provided starting matrix
   [numRows, numCols] = size(startState);
+
 
   % The world is padded by one unit of space on all 4 boundaries
   %   which are not game cells, hence do not react according to the game rules,
   %   and exists only to prevent out-of-bounds access when counting neighbours
-  % The hex-grid is padded by two units of space on its left and right
+  % Only the horizontal padding is variable (as it is not 1 in the hex grid)
   numPadding = 1;
+
 
   % Total number of possible cells - computed differently in a hex grid
   nCellsTotal = numRows*numCols;
 
+
   % Grid-type dependent variables
   switch grid
+
     % Adjusting the aspect ratio corrects any possible disproportion in
-    %   spacing from auto-stretching and the arrangement of cells
-    %                                   (in the hexagonal & triangular grid)
+    %   spacing from auto-stretching or due to the shape of the plot markers
+    %   and the arrangement of cells in the hexagonal and triangular grids
 
     case 'sqr'
       aspectRatio = [1 1];
@@ -70,12 +92,26 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
       %   nCellsTotal computation and numPadding is different.
 
       % There is extra horizontal padding in hex grid
-      % as neighbours are necessarily distanced 2-units horizontally
+      % as neighbours are necessarily distanced 2-units horizontally, as such:
+      %   00⬢⬡⬢⬡⬢⬡⬢⬡⬢00
+      %   00⬡⬢⬡⬢⬡⬢⬡⬢⬡00 - where ⬢ represents every game cell (dead or alive)
+      %   00⬢⬡⬢⬡⬢⬡⬢⬡⬢00 - and ⬡ every unused position in the matrix
+      %   00⬡⬢⬡⬢⬡⬢⬡⬢⬡00
+
       numPadding = 2;
 
+      % nCellsTotal computation:
       if mod(numRows,2)==0 % If numRows is even, averaging num of elements works
+        % E.g., for numRows=2, numCols=5:
+        %   ⬢-⬢-⬢
+        %   -⬢-⬢-          2 * 5 / 2 = 5 elements
         nCellsTotal = numRows*numCols/2;
+
       else % Otherwise, need to consider differences in elements per row
+        % E.g., for numRows=3, numCols=5:
+        %   ⬢ ⬢ ⬢
+        %    ⬢ ⬢
+        %   ⬢ ⬢ ⬢          (3-1)*5/2 + ceil(5/2) = 8
         nCellsTotal = (numRows-1)*numCols/2 + ceil(numCols/2);
       endif
 
@@ -89,18 +125,19 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
 
       % Prepare filter for identifying triangle type based on position
       % Types being either downward-facing or upward-facing
-      for r=2:numRows+1
-        for c=2:numCols+1
-          offset = mod(r+c, 2);
-          dTF(r,c) = 1 - offset;
-          uTF(r,c) = offset;
-        endfor
+      for r=2:numRows+1          %  dTF   uTF  - example as used in 3x3 world
+        for c=2:numCols+1        % 00000 00000    00000
+          offset = mod(r+c, 2);  % 01010 00100    0▼▲▼0
+          dTF(r,c) = 1 - offset; % 00100 01010    0▲▼▲0
+          uTF(r,c) = offset;     % 01010 00100    0▼▲▼0
+        endfor                   % 00000 00000    00000
       endfor
       % Force the last row's & column's existance in these matrices
       dTF(numRows+2,numCols+2) = 0;
       uTF(numRows+2,numCols+2) = 0;
 
   endswitch
+
   % Other variables from common computations:
 
   % Assign limits such that paddings are disregarded in the displayed plot
@@ -127,7 +164,7 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
   %     3rd iteration: worldState{1} is redisplayed, worldState{2} is rewritten
   %     and so on...
 
-  figure(2);
+  figure(1);
 
   now = 1; % Variable to track the matrix currently holding the active state
 
@@ -148,11 +185,12 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
       % Draw the latest state of the game world as recorded in worldState{now}
 
       % About markerScale: see info @ top of script
+
       case 'sqr'
         spy(worldState{now}, 'sk', 1*markerScale);
       case 'hex'
         spy(worldState{now}, 'hexagramk', 2*markerScale);
-       case 'tri'
+      case 'tri'
         % Filter the state matrix to draw only downward-facing triangles with ▼
         spy(worldState{now}.*dTF, 'vk', 2*markerScale);
         hold on;
@@ -182,16 +220,19 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
 
     % Save images if needed;
     drawnow;
+    % Extract frame from figure,
     frame = getframe(figure(1));
     im = frame2im(frame);
-    filename = sprintf('%s.gif', worldName);
+    % and convert it from rgb>grayscale->indexed image
     [A,map] = gray2ind(rgb2gray(im));
+    % Create the gif if valid recordInterval set
+    % Use distinct DelayTimes for first and last frames
     if gen == recordInterval(1)
       imwrite(A,map,filename,"gif","LoopCount",Inf,"DelayTime",0.25);
     elseif gen > recordInterval(1) && gen < recordInterval(2)
       imwrite(A,map,filename,"gif","WriteMode","append","DelayTime",0.1);
     elseif gen == recordInterval(2)
-        imwrite(A,map,filename,"gif","WriteMode","append","DelayTime",0.25);
+      imwrite(A,map,filename,"gif","WriteMode","append","DelayTime",0.25);
     end
 
 
@@ -201,12 +242,15 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
     rowRange = 2:numRows+1;
     colRange = 2:numCols+1;
 
-
     for r = rowRange
       if grid=='hex'
         % If it's a hex grid, override the default colRange vector
-        %   as its cells are arranged staggered
+        %   as its cells are arranged staggered, as shown below,
         %   and should be accessed as such.
+        %   --⬡-⬡-⬡-⬡ ...
+        %   ---⬡-⬡-⬡- ... where ⬡ is every actual in-game position.
+        %   --⬡-⬡-⬡-⬡ ...       - is every unused position in the matrix
+        %   ---⬡-⬡-⬡- ...
         startIndex = 3 + mod(r, 2);
         colRange = startIndex:2:numCols+2;
       endif
@@ -220,10 +264,18 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
             % Extract the 3-by-3 matrix of the cell's neighbourhood
             neighbourhood = worldState{now}(r-1:r+1, c-1:c+1);
             % ... but also count itself out of the matrix
+            % □ ■ ■ ■ □
+            % □ ■ ⧄ ■ □      where ⧄ is the cell in question
+            % □ ■ ■ ■ □            ■ is a neighbour cell
+            % □ □ □ □ □
             neighbourhood(2,2) = 0;
 
           case 'hex'
             % Include surrounding cells i.e. cells adjacent to its 6 edges
+            % ⬡ ⬡ ⬢ ⬢ ⬡ ⬡
+            %  ⬡ ⬢ ✡ ⬢ ⬡    where ✡ is the cell in question,
+            % ⬡ ⬡ ⬢ ⬢ ⬡ ⬡         ⬢ is a neighbour cell
+            %  ⬡ ⬡ ⬡ ⬡ ⬡          horizontal space between are unused positions
             neighbourhood = [
               worldState{now}(r-1:2:r+1, c-1:2:c+1); % in adjacent row
               worldState{now}(r, c-2:4:c+2) % in same row
@@ -231,12 +283,16 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
 
           case 'tri'
             % Use row & column numbers to determine the triangle type
-            % (upwards or downwards triangle), then pick the neighbours
-            if mod(r+c, 2)==0
+            %    ^
+            %   ^▼^   -  Downward pointing;  v▲v - Upward pointing
+            %                                 v
+            % Then, pick the corresponding neighbours (^s and v's shown above).
+
+            if mod(r+c, 2)==0 % The triangle is downward pointing ▼
               neighbourhood = [
                 worldState{now}(r, c-1:2:c+1) worldState{now}(r-1, c)
               ];
-            else
+            else % The triangle is upward pointing ▲
               neighbourhood = [
                 worldState{now}(r, c-1:2:c+1) worldState{now}(r+1, c)
               ];
