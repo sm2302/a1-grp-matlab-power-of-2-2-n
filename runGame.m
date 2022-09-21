@@ -19,7 +19,7 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
   switch grid
     % Adjusting the aspect ratio corrects any possible disproportion in
     %   spacing from auto-stretching and the arrangement of cells
-    %                                        (in the hexagonal grid)
+    %                                   (in the hexagonal & triangular grid)
 
     case 'sqr'
       aspectRatio = [1 1];
@@ -48,6 +48,8 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
     case 'tri'
       aspectRatio = [1.85 1];
 
+      % Prepare filter for identifying triangle type based on position
+      % Types being either downward-facing or upward-facing
       for r=2:numRows+1
         for c=2:numCols+1
           offset = mod(r+c, 2);
@@ -55,6 +57,7 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
           uTF(r,c) = offset;
         endfor
       endfor
+      % Force the last row's & column's existance in these matrices
       dTF(numRows+2,numCols+2) = 0;
       uTF(numRows+2,numCols+2) = 0;
 
@@ -84,7 +87,7 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
   %     3rd iteration: worldState{1} is redisplayed, worldState{2} is rewritten
   %     and so on...
 
-  figure(1);
+  figure(2);
 
   now = 1; % Variable to track the matrix currently holding the active state
 
@@ -166,6 +169,8 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
             ];
 
           case 'tri'
+            % Use row & column numbers to determine the triangle type
+            % (upwards or downwards triangle), then pick the neighbours
             if mod(r+c, 2)==0
               neighbourhood = [
                 worldState{now}(r, c-1:2:c+1) worldState{now}(r-1, c)
@@ -175,7 +180,6 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
                 worldState{now}(r, c-1:2:c+1) worldState{now}(r+1, c)
               ];
             endif
-
         endswitch
 
         % From the array of neighbouring cells, count the living ones.
@@ -201,4 +205,3 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
 
   endwhile
 endfunction
-
