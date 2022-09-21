@@ -45,6 +45,19 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
       startState(1:2:numRows, 2:2:numCols) = 0;
       startState(2:2:numRows, 1:2:numCols) = 0;
 
+    case 'tri'
+      aspectRatio = [1.85 1];
+
+      for r=2:numRows+1
+        for c=2:numCols+1
+          offset = mod(r+c, 2);
+          dTF(r,c) = 1 - offset;
+          uTF(r,c) = offset;
+        endfor
+      endfor
+      dTF(numRows+2,numCols+2) = 0;
+      uTF(numRows+2,numCols+2) = 0;
+
   endswitch
 
   % Assign limits such that paddings are disregarded in the displayed plot
@@ -93,6 +106,11 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
         spy(worldState{now}, 'sk', 1*markerScale);
       case 'hex'
         spy(worldState{now}, 'hexagramk', 2*markerScale);
+      case 'tri'
+        spy(worldState{now}.*dTF, 'vk', 2*markerScale);
+        hold on;
+        spy(worldState{now}.*uTF, '^k', 2*markerScale);
+        hold off;
     endswitch
 
     % Compute the number of living cells
@@ -146,6 +164,17 @@ function runGame (grid='sqr', birth=3, life=[2, 3], startState=sprand(100,100, 0
               worldState{now}(r-1:2:r+1, c-1:2:c+1); % in adjacent row
               worldState{now}(r, c-2:4:c+2) % in same row
             ];
+
+          case 'tri'
+            if mod(r+c, 2)==0
+              neighbourhood = [
+                worldState{now}(r, c-1:2:c+1) worldState{now}(r-1, c)
+              ];
+            else
+              neighbourhood = [
+                worldState{now}(r, c-1:2:c+1) worldState{now}(r+1, c)
+              ];
+            endif
 
         endswitch
 
