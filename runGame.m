@@ -1,7 +1,39 @@
 function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, worldName='default', recordInterval = [-1 -1])
 
+  % This program runs, and illustrates, a Game of Life world with user-specified
+  % (or default) properties. It makes use of a WHILE-LOOP to:
+  %   - draw each generation of the game world via. the spy() function
+  %   - compute the state of the generation after the one that has been drawn
+  % Game state data is stored in TWO SPARSE MATRICES:
+  %   - one, which stores the latest complete data, is used for reference
+  %     in drawing and as the basis for computation of a new state
+  %   - the other, which stores outdated data, is in the current loop being
+  %     overwritten with the new state's data based on said computation
+  % These two matrices are switched at one point in each game loop.
+  %
+  %
+  % Input arguments:
+  %
+  %         grid -- string; Possible values: {'sqr'/'hex'/'tri'}
+  %                 - The type of grid the game cells would live on
+  %
+  %        birth -- integer, or, vector of integers
+  %                 - The amount of neighbours of a dead cell required for birth
+  %                   i.e. it be given life
+  %
+  %         life -- integer, or, vector of integers
+  %                 - Amount of neighbours required to maintain life
+  %                   of an already living cell
+  %
+  %   startState -- matrix of zeros and non-zeros
+  %                 - Represents the life-or-death states of all cells
+  %                   at the start of the game; 0 being dead, non-0 being alive
+  %
+  %      numGens -- integer
+  %                 - The number of total generations the game will run
   [grid, birth, life, startState, numGens, worldName recordInterval] = validateAndSetDefaultArgs(grid, birth, life, startState, numGens, worldName,  recordInterval);
 
+  % Save the seed in case we want to rerun the world.
   lastSeed = startState;
   save('lastSeed','lastSeed');
 
@@ -10,6 +42,7 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
   %   However, when the figure window is maximized, 2.5 is more suitable.
   markerScale = 1;
 
+  % Extract the size of the provided starting matrix
   [numRows, numCols] = size(startState);
 
   % The world is padded by one unit of space on all 4 boundaries
@@ -18,6 +51,7 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
   % The hex-grid is padded by two units of space on its left and right
   numPadding = 1;
 
+  % Total number of possible cells - computed differently in a hex grid
   nCellsTotal = numRows*numCols;
 
   % Grid-type dependent variables
@@ -39,9 +73,9 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
       % as neighbours are necessarily distanced 2-units horizontally
       numPadding = 2;
 
-      if mod(numRows,2)==0
+      if mod(numRows,2)==0 % If numRows is even, averaging num of elements works
         nCellsTotal = numRows*numCols/2;
-      else
+      else % Otherwise, need to consider differences in elements per row
         nCellsTotal = (numRows-1)*numCols/2 + ceil(numCols/2);
       endif
 
@@ -67,6 +101,7 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
       uTF(numRows+2,numCols+2) = 0;
 
   endswitch
+  % Other variables from common computations:
 
   % Assign limits such that paddings are disregarded in the displayed plot
   axesLimits = [numPadding+1, numPadding+numCols, 2, numRows+1];
@@ -106,17 +141,22 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
     %   i.e. worldState{next} =/= worldState{now}
     next = mod(now, 2) + 1;
 
-    pause(0.05);
+    %pause(0.05); % Pause for a set duration to allow the world to be plotted
 
-    % Draw the latest state of the game world
+    % According to grid type:
     switch grid
+      % Draw the latest state of the game world as recorded in worldState{now}
+
+      % About markerScale: see info @ top of script
       case 'sqr'
         spy(worldState{now}, 'sk', 1*markerScale);
       case 'hex'
         spy(worldState{now}, 'hexagramk', 2*markerScale);
-      case 'tri'
+       case 'tri'
+        % Filter the state matrix to draw only downward-facing triangles with ▼
         spy(worldState{now}.*dTF, 'vk', 2*markerScale);
         hold on;
+        % Now, filter to draw only upward-facing triangles with ▲
         spy(worldState{now}.*uTF, '^k', 2*markerScale);
         hold off;
     endswitch
@@ -140,12 +180,7 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
     axis off;
 
 
-    % Compute the next world state, and write the values in worldState{next}:
-
-    % Default vectors to be used for iterating through each cell
-    rowRange = 2:numRows+1;
-    colRange = 2:numCols+1;
-
+    % Save images if needed;
     drawnow;
     frame = getframe(figure(1));
     im = frame2im(frame);
@@ -158,6 +193,14 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
     elseif gen == recordInterval(2)
         imwrite(A,map,filename,"gif","WriteMode","append","DelayTime",0.25);
     end
+
+
+    % Compute the next world state, and write the values in worldState{next}:
+
+    % Default vectors to be used for iterating through each cell
+    rowRange = 2:numRows+1;
+    colRange = 2:numCols+1;
+
 
     for r = rowRange
       if grid=='hex'
