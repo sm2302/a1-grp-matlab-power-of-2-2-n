@@ -1,7 +1,7 @@
-function [grid, birth, life, startState, numGens, worldName, recordInterval] = validateAndSetDefaultArgs (grid, birth, life, startState, numGens, worldName, recordInterval)
+function [grid, birth, life, startState, numGens, worldName, markerScale, recordInterval] = validateAndSetDefaultArgs (grid, birth, life, startState, numGens, worldName, markerScale, recordInterval)
 
   % This function is not meant to be used directly. It is for validating
-  %   arguments and setting default values in the function runGame()
+  %   arguments and setting default values in the function runGame().
   %
   % Input values: Same input values for the runGame() function
   %
@@ -30,17 +30,17 @@ function [grid, birth, life, startState, numGens, worldName, recordInterval] = v
       nbrRange = [0, 8];
       dBirth = 3; dLife = [2, 3];
       dStartState = [100, 100, 0.1];
-      dWorldName = "Square_Grid";
+      dWorldName = "Square-Grid";
     case 'hex'
       nbrRange = [0, 6];
       dBirth = [3, 4]; dLife = [2, 3, 4];
       dStartState = [80, 140, 0.2];
-      dWorldName = "Hexagonal_Grid";
+      dWorldName = "Hexagonal-Grid";
     case 'tri'
-      nbrRange = [0, 3];
-      dBirth = 2; dLife = [1, 2];
-      dStartState = [50, 97, 0.2];
-      dWorldName = "Triangular_Grid";
+      nbrRange = [0, 12];
+      dBirth = [4 8]; dLife = [4 5 6];
+      dStartState = [40, 52, 0.2];
+      dWorldName = "Triangular-Grid";
     otherwise
       error(sprintf('Invalid grid shape "%s". Valid: sqr, tri, hex', grid));
   endswitch
@@ -51,10 +51,10 @@ function [grid, birth, life, startState, numGens, worldName, recordInterval] = v
     birth = dBirth; life = dLife;
     warnDBL = true;
   % If not default values, validate birth and date argument
-  elseif any([birth, life] < nbrRange(1)) || any([birth, life] > nbrRange(2))
+  elseif any([birth, life] < nbrRange(1)) || any([birth, life] > nbrRange(2)+1)
     error(sprintf(
-      'Invalid birth or life argument. Valid: %d <= arg <= %d',
-      nbrRange(1), nbrRange(2)));
+      'Invalid birth or life argument. Valid: %d <= arg <= %d (%d for never)',
+      nbrRange(1), nbrRange(2)+1), nbrRange(2)+1);
   endif
 
 
@@ -80,6 +80,13 @@ function [grid, birth, life, startState, numGens, worldName, recordInterval] = v
     worldName = dWorldName;
   endif
 
+  if size(recordInterval, 1) * size(recordInterval, 2) ~= 2
+    error('Invalid recordInterval passed. Valid: Array of exactly two numbers');
+  endif
+
+  if markerScale <= 0
+    error('Invalid markerScale passed. Valid: Number greater than 0. E.g. 1,2,3.');
+  endif
 
   % Show warning message for default values
   if warnDG || warnDBL || warnDSS || warnDNG || warnDWN
@@ -105,4 +112,4 @@ function [grid, birth, life, startState, numGens, worldName, recordInterval] = v
     warning(warnMessage);
   endif
 
-##endfunction
+endfunction
