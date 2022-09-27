@@ -48,7 +48,7 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
   [grid, birth, life, startState, numGens, worldName recordInterval] = validateAndSetDefaultArgs(grid, birth, life, startState, numGens, worldName,  recordInterval);
 
   % Filename in case we save file to gif
-  filename = sprintf('%s.gif', worldName);
+  filename = sprintf('%s.gif', worldName); im = {};
 
   % Save the seed in case we want to rerun the world.
   lastSeed = startState;
@@ -220,20 +220,11 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
 
     % Save images if needed;
     drawnow;
-    % Extract frame from figure,
-    frame = getframe(figure(1));
-    im = frame2im(frame);
-    % and convert it from rgb>grayscale->indexed image
-    [A,map] = gray2ind(rgb2gray(im));
-    % Create the gif if valid recordInterval set
-    % Use distinct DelayTimes for first and last frames
-    if gen == recordInterval(1)
-      imwrite(A,map,filename,"gif","LoopCount",Inf,"DelayTime",0.25);
-    elseif gen > recordInterval(1) && gen < recordInterval(2)
-      imwrite(A,map,filename,"gif","WriteMode","append","DelayTime",0.1);
-    elseif gen == recordInterval(2)
-      imwrite(A,map,filename,"gif","WriteMode","append","DelayTime",0.25);
-    end
+
+    if gen >= recordInterval(1) && gen <= recordInterval(2)
+      frame = getframe(fig);
+      im{1 + gen - recordInterval(1)} = frame2im(frame);
+    endif
 
 
     % Compute the next world state, and write the values in worldState{next}:
@@ -320,5 +311,10 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
     %   i.e. in worldState{now}
     now = next;
 
-  endwhile
+  endwhile % End of game-loop
+
+  writeFramesToGif(recordInterval, im, filename);
+
+  fprintf("Game run for %s complete\n\n", worldName);
+
 endfunction
