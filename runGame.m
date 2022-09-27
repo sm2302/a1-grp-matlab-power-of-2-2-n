@@ -164,7 +164,7 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
   %     3rd iteration: worldState{1} is redisplayed, worldState{2} is rewritten
   %     and so on...
 
-  figure(1);
+  fig = figure(1);
 
   now = 1; % Variable to track the matrix currently holding the active state
 
