@@ -1,4 +1,4 @@
-function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, worldName='default', recordInterval = [-1 -1])
+function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, worldName='default', markerScale = 2, recordInterval = [-1 -1])
 
   % This program runs, and illustrates, a Game of Life world with user-specified
   % (or default) properties. It makes use of a WHILE-LOOP to:
@@ -45,7 +45,7 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
 
   % Validate input args and assign default values where appropriate
   %   Taking this portion of the code out of this function script keeps it neat
-  [grid, birth, life, startState, numGens, worldName recordInterval] = validateAndSetDefaultArgs(grid, birth, life, startState, numGens, worldName,  recordInterval);
+  [grid, birth, life, startState, numGens, worldName, markerScale, recordInterval] = validateAndSetDefaultArgs(grid, birth, life, startState, numGens, worldName, markerScale, recordInterval);
 
 % Filename in case we write figure frames to gif. Empty images cell array
   filename = sprintf('%s.gif', worldName);          im = {};
@@ -53,11 +53,6 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
   % Save the seed in case we want to rerun the world.
   lastSeed = startState;
   save('lastSeed','lastSeed');
-
-  % NOTE:
-  %   Marker scale is just 1 for default figure size,
-  %   However, when the figure window is maximized, 2.5 is more suitable.
-  markerScale = 1;
 
 
   % Extract the size of the provided starting matrix

@@ -1,4 +1,4 @@
-function [grid, birth, life, startState, numGens, worldName, recordInterval] = validateAndSetDefaultArgs (grid, birth, life, startState, numGens, worldName, recordInterval)
+function [grid, birth, life, startState, numGens, worldName, markerScale, recordInterval] = validateAndSetDefaultArgs (grid, birth, life, startState, numGens, worldName, markerScale, recordInterval)
 
   % This function is not meant to be used directly. It is for validating
   %   arguments and setting default values in the function runGame()
@@ -78,6 +78,14 @@ function [grid, birth, life, startState, numGens, worldName, recordInterval] = v
 
   if strcmp(worldName, 'default')
     worldName = dWorldName;
+  endif
+
+  if size(recordInterval, 1) * size(recordInterval, 2) ~= 2
+    error('Invalid recordInterval passed. Valid: Array of exactly two numbers');
+  endif
+
+  if markerScale <= 0
+    error('Invalid markerScale passed. Valid: Number greater than 0. E.g. 1,2,3.');
   endif
 
 
