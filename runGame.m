@@ -47,8 +47,8 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
   %   Taking this portion of the code out of this function script keeps it neat
   [grid, birth, life, startState, numGens, worldName recordInterval] = validateAndSetDefaultArgs(grid, birth, life, startState, numGens, worldName,  recordInterval);
 
-  % Filename in case we save file to gif
-  filename = sprintf('%s.gif', worldName); im = {};
+% Filename in case we write figure frames to gif. Empty images cell array
+  filename = sprintf('%s.gif', worldName);          im = {};
 
   % Save the seed in case we want to rerun the world.
   lastSeed = startState;
@@ -221,11 +221,13 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
     % Save images if needed;
     drawnow;
 
+    % Save the range of frames to be written to the gif;
+    %   To opt out, just make the recordInterval values impossible to be met
     if gen >= recordInterval(1) && gen <= recordInterval(2)
+      % Extract frame from figure to be written to the gif file later
       frame = getframe(fig);
       im{1 + gen - recordInterval(1)} = frame2im(frame);
     endif
-
 
     % Compute the next world state, and write the values in worldState{next}:
 
@@ -313,6 +315,9 @@ function runGame (grid='default', birth=-1, life=-1, startState=-1, numGens=-1, 
 
   endwhile % End of game-loop
 
+  % Save stored frames to .gif file.
+  %   This is done outside the game-loop to prevent huge delay in plotting
+  %   as the increase in time requirement compounds the higher the no of frames
   writeFramesToGif(recordInterval, im, filename);
 
   fprintf("Game run for %s complete\n\n", worldName);
