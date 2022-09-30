@@ -32,9 +32,33 @@
     <td><img src="animations/Game of LIFE.gif"></td>
     <td><img src="animations/Tri-Grid.gif"></td>
   </tr>
+    <td><a href=#neighbourhood-computation>Neighbours</a> = 8</td>
+    <td><a href=#neighbourhood-computation>Neighbours</a> = 12</td>
+  <tr>
+  </tr>
+  <tr>
+    <td>
+      Frequently occuring activity patterns include <i>still-life</i>s (a group of neighbouring cells that do not evolve from one generation to the next), <i>oscillators</i> (group of cells that evolve but return to the same pattern after a certain number of generations (know as its period), and <i>spaceships</i> (same as oscillators, but which end up on a different location after each period)
+    </td>
+    <td>
+      It is also possible to have the LIFE-like patterns occur in the triangular grid, with the rules Birth=<code>4,8</code> and Survival=<code>4,5,6</code>, albeit being rarer than in the Game of LIFE. Above shows the occurance of spaceships from a randomly generated initial state (but now saved in <a href=#relevant-files-descriptions>savedStates.mat</a>
+    </td
+  </tr>
   <tr>
     <td><img src="animations/Hex-Grid.gif"></td>
     <td><img src="animations/Hex-Grid with 3 states.gif"></td>
+  </tr>
+  </tr>
+    <td><a href=#neighbourhood-computation>Neighbours</a> = 6</td>
+    <td><a href=#neighbourhood-computation>Neighbours</a> = 6</a></td>
+  <tr>
+  <tr>
+    <td>
+      We have not been able to find any combination of rules that can fascilitate the occurance of activity patterns that closely resembles the Game of LIFE. However using the rules Birth=<code>3,4</code> and Survival=<code>2,3,4</code> leads to a nice result of hexagon structures consuming nearby neighbours. These hexagons' outline become stable when there are no more neighbours. Initially their interior are chaotic but these too slowly stabilize to mostly hexagonal lattices (and small amounts of still or oscillating spots) at some point (as can be seen happening to the small hexagon at the <b>top center / 12 o'clock</b> in the animation above). The larger the hexagon, the more time it takes (sometimes 1000+ generations) to for its interior to stabilize fully.
+    </td>
+    <td>
+      We were, however, able to cause more LIFE-like activity patterns to occur by breaking a rule. That is, in using three states (dead, blue <sub>(yellow in Joe's post)</sub>, and red) instead of two (dead and alive), and a certain combination of state-change rules (Birth=<code>4</code>, Survival<sub><sub>b->r</sub></sub>=<code>1,2,3,4,5</code>, Survival<sub><sub>r->r</sub></sub>=<code>1,2</code> and Survival<sub><sub>r->b</sub></sub>=<code>4</code>), as mentioned in <a href="https://www.quora.com/Are-there-variations-of-Conways-Game-of-Life-based-upon-a-triangular-or-hexagonal-grid">Joe Wezorek's post</a>
+    </td>
   </tr>
 </table>
 
@@ -50,6 +74,15 @@
     <td>Birth=<code>1,3,5,7</code> Survival=<code>1,3,5,7</code></td>
     <td>Birth=<code>2</code> Survival=<code>NEVER</code></td>
   </tr>
+  <tr>
+    <td align=center>
+      Replicator rules, especially it requiring as few as 1 neighbour for cell births, mean that
+      it is fine to start with just one living cell in the world as done in this example.
+      Cells quickly replicate in a pattern extending outwards. Massive death occurs when two extending structures collide.
+    </td>
+    <td align=center>
+      In Seeds, all cells die instantly in the generation after their birth. However because having 2 neighbours (condition for birth) is quite common, expansion occurs quickly. And once the world is dense enough the activity patterns become chaotic.
+    </td>
   </tr>
   <tr>
     <td><img src="animations/LIFE WITHOUT DEATH.gif"></td>
@@ -58,6 +91,16 @@
    <tr>
     <td>Birth=<code>3</code> Survival=<code>ANY</code></td>
     <td>Birth=<code>3,5,6,7,8</code> Survival=<code>5,6,7,8</code></td>
+  </tr>
+  <tr>
+    <td align=center>
+      The "neighbourhood" of cells keep expanding without any reversal as the cells never die.
+      However since having 3 neighbours (the birth condition) isn't that common, the expansion occurs quite slowly
+      in contrast to Replicator. The animation is sped up 2x for better demonstration of the expansion.
+    </td>
+    <td align=center>
+      The cells in Diamoeba stabilize to form (usually diamond shaped) structures resembling amoebas.
+    </td>
   </tr>
 </table>
 

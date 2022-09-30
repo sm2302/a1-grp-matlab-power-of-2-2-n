@@ -94,7 +94,7 @@ data(1,1:3) = {A, grid, label};
 label = "Tri-Grid";
 grid = "triangle";
 stepFn = @stepTriangle;
-load savedStates2 triSeed; A = triSeed; % Load a saved state (which guarantees occurance of gliders)
+load savedStates triSeed; A = triSeed; % Load a saved state (which guarantees occurance of gliders)
 % A = sprand(75, 100, 0.15) > 0; % Alternatively, a random seed can be used as with other CA
 
 for i = 1:N
