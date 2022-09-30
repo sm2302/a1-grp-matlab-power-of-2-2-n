@@ -115,7 +115,7 @@
 | stepSquare.m | Almost exactly similar to stepLife, except that it expects 2 additional input arguments, the birth condition and survival condition (vector of numbers of neighbours to cause birth or survival) |
 | stepTriangle.m | Like stepLife.m, it has fixed rules (for simplicity), but has two different methods of computing neighbourhood depending on the cell's location in the grid (upward pointing or downward pointing triangle) |
 | stepHex.m | Similar to stepLife.m with the exception of its own fixed set of rules (for simplicity) and neighbourhood computation due to its grid shape and coordinates system (refer down below) |
-| stepHex3.m | Modification to stepHex.m. Different than the other step functions in that it computes for a world where cells have three different states e.g. dead, blue (alive) and red (alive) instead of 2 (dead and alive). This allows for a more LIFE-like activity pattern, as shown in [animation below](#Square-Grid-Cellular-Automata-with-Different-Rules)|
+| stepHex3.m | Modification to stepHex.m. Different than the other step functions in that it computes for a world where cells have three different states e.g. dead, blue (alive) and red (alive) instead of 2 (dead and alive). This allows for a more LIFE-like activity pattern, as shown in the [animation above](#animations-solution-output)|
 | getLattice.m | Generates one of two types of checkerboard pattern, i.e., either starting with 1, or starting with 0, of size determined by the `height` and `width` values passed as numeric arguments (along with the single character argument, the lattice `type`) |
 | im2gif.m | Accepts as input arguments (1) a cell array of `im`s and (2) a string of the intended filename, to create a .gif image file (such as the ones used in the animations further below)|
 | fig2png.m | Accepts as its arguments (1) a figure handle and (2) a string of the intended filename, to create a .png image (not animated) of everything currently on the figure |
@@ -171,7 +171,7 @@ where `A` is the start state to be assigned a value, and `sprand` used in this m
   0     0     0   0.3     0
 ```
 
-... though it will be in the form of a sparse matrix, meaning each non-zero element's row and columnt coordinates are kept in memory and the `0`s are ignored.
+... though it will be in the form of a sparse matrix, meaning each non-zero element's row and column coordinates are kept in memory and the `0`s are ignored.
 
 Alternatively, any saved state can be used too as the initial state, such as:
 
@@ -197,38 +197,279 @@ endfor
 ### Within the Loop
 <sup>[Back to list of contents](#contents)</sup>
 
+```MATLAB
+for i = 1:N
+  plotGrid(A, grid, label, markerScale);
+  A = stepFn(A);
+endfor
+```
+
+In each iteration up to N times, calls are made to
+1. [`plotGrid`](#the-plot-function-plotgrid), which handles plotting related procedures, and
+2. [`stepFn`](#the-step-function) which is a handle to one of the five step functions, which takes in the current state `A` and assigns to itself (`A`) the new computed state.
+
 #### The Plot Function `plotGrid`
 <sup>[Back to list of contents](#contents)</sup>
+
+`plotGrid` is a general function in that it is used for all different grid types (square, triangular and hexagonal). It accepts 4 input arguments
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| A        | Sparse matrix | A Matrix whose elements represents the state of the cells which is to be plotted |
+| shape    | String | The shape of the grid: `square`, `triangle`, `hexagon` or `hexagon3`. This will determine which plot markers to use and the aspect ratio of the plot |
+| label    | String | The name to display on top of the plot |
+| markerScale | Double | Number which determines how small or big the plot marker is drawn relative to the number that seems to be just right. Default value and normal scale is 1. |
+| titleScale| Double | Number which determines how small or big the title text is compared to the default value we set (44). Default value for the scale is 1. |
 
 ##### Plot Marker Configurations
 <sup>[Back to list of contents](#contents)</sup>
 
+It is best to make the plot markers distanced as closely to each other as possible without overlap. This is done by making it inversely proportional to the height of the matrix, i.e. have it be multiplied by `1/size(A,1)`.
+
+```MATLAB
+  spy(A, '*k', baseMarkerSize/size(A,1)*markerScale);
+```
+
 ##### Aspect Ratios
 <sup>[Back to list of contents](#contents)</sup>
+
+To keep the figures plotted in proportion (one horizontal unit = one vertical unit) and not automatically stretch according to the current figure window dimensions, the `daspect` function is used
+
+| Grid | Statement |
+| ---- | --------- |
+| square | `daspect([1 1])` |
+| triangular | `daspect([1.3 1])` |
+| hexagonal | `daspect([1.75 1])` |
+
+The higher the Y:X ratio the more tightly packed the elements are horizontally compared to vertically.
+
+Having this done in the triangular and hexagonal grid is necessary due to the [coordinates system](#coordinates-system) implemented in these grids.
 
 ##### Title Setting
 <sup>[Back to list of contents](#contents)</sup>
 
+$TeX$ notation `\fontsize{effected text}` is used for increasing the font size, as normally it is too small. Additionally, the optional argument `titleScale` can be set to other than `1` to enlarge or shink the font.
+
+```MATLAB
+title(['\fontsize{', sprintf("%d",44*titleScale), '}', label]);
+```
+
+The $TeX$ notation, the evaluated font size and the input argument `label` are concatenated with square brackets similar to how we would a row vector of numbers
+
 #### The Step Function
 <sup>[Back to list of contents](#contents)</sup>
 
-##### Usage of `ncAlive = nnz(A)` and `spalloc`
+The step function for the Game of Life
+
+```MATLAB
+function A1 = stepLife(A0)
+
+  ncAlive = nnz(A0);
+
+  [h, w] = size(A0);
+  N = spalloc(h, w, ncAlive*4);
+  A1 = spalloc(h, w, ncAlive);
+
+  N += conv2(A0, [1 1 1;
+                  1 0 1;
+                  1 1 1], 'same');
+
+  A1 += (~A0.*N == 3);
+
+  A1 += (A0.*N == 2) + (A0.*N == 3);
+
+endfunction
+```
+
+##### Usage of `ncAlive = nnz(A0)` and `spalloc`
 <sup>[Back to list of contents](#contents)</sup>
+
+> This section has mentions on cells' neighbours and neighbourhood but does not explain them. For the explanation, see [section on neighbourhood computation](#neighbourhood-computation)
+
+`ncAlive = nnz(A0)` just assigns to `ncAlive` the count of non-zero elements in the sparse matrix A i.e. the number of alive cells in the current state
+
+This count is useful in making operations on the sparse matrix more efficient.
+
+How so?
+
+A sparse matrix only takes as much storage as the amount of nonzero elements it contains (along with these elements' coordinates, or position values). Similarly the amount of time an operation on it takes is also proportional to the amount of nonzero elements it has.
+
+In other words, operations on sparse matrices become more efficient the lower the number of non-zero values.
+
+Additionally, the precise the amount of memory allocated for the amount of nonzero values a sparse array would have, the more efficient adding nonzero values to the already allocated memory would be.
+
+`spalloc(h, w, nnz)` initializes an empty sparse matrix of size `h` by `w` with a soft capacity to hold `nnz` amount of nonzero values
+
+```MATLAB
+N = spalloc(h, w, ncAlive*3);
+A1 = spalloc(h, w, ncAlive);
+```
+
+N in any step function is the sparse matrix whose elements are the number of alive neighbours the corresponding cell in the same position in matrix A0 has.
+
+A1 is the sparse matrix that would hold `1`s where there are alive cells in the next state
+
+For the variable N, the final number of nonzeros would be the total number of indices in the matrix which are neighbours of any currently living cell.
+
+For the estimate for how many room to allocate, we just picked an arbitrary but reasonable (e.g. `3`) number that is less than the maximum number of neighbours for each cell to multiply with the amount of living cells `ncAlive`. The reason being that N should be proportional to the amount of living cells yet we acknowledge neighbouring positions of alive cells do overlap, hence not using too high of a multiplier for `ncAlive`.
+
+For the variable A1, we just picked exactly ncAlive to be the estimate as general world state does tend to stabilize in most Cellular Automata that we included in the solutions.m file.
 
 ##### Coordinates System
 <sup>[Back to list of contents](#contents)</sup>
 
+A simple coordinate system
+
+```
+Row\Col 1 2 3 4 5 6
+      1 □ □ □ □ □ □
+      2 □ □ □ □ □ □
+      3 □ □ □ □ □ □
+      4 □ □ □ □ □ □
+      5 □ □ □ □ □ □
+      6 □ □ □ □ □ □
+```
+
+... which is possible for a square grid. However for the triangular and hexagonal grid, it isn't as straightforward
+
 ###### Hexagonal Grid
 <sup>[Back to list of contents](#contents)</sup>
+
+For the hexagonal grid, we used the _Doubled Coordinates_ system as described by [Red Blob Games](https://www.redblobgames.com/grids/hexagons/#coordinates) which looks like
+
+```
+Row\Col 1 2 3 4 5 6
+      1 ⬡   ⬡   ⬡
+      2   ⬡   ⬡   ⬡
+      3 ⬡   ⬡   ⬡
+      4   ⬡   ⬡   ⬡
+      5 ⬡   ⬡   ⬡
+      6   ⬡   ⬡   ⬡
+```
+
+... where in each row, every two positions are not used in the above manner, meaning one cell would horizontally be distanced two units apart, systematically i.e. only in their indices. However when plotting, the gaps have to be hidden, hence the high Y:X (aspect ratio)[#aspect-ratios] which scales down visual horizontal distances between cells relative to their vertical distances
 
 ###### Triangular Grid
 <sup>[Back to list of contents](#contents)</sup>
 
+After knowing the solution to implementing a hex grid, it was not difficult to come up with our own similar solution in implementing the triangular grid, i.e.
+
+```
+Row\Col 1 2 3 4 5 6
+      1 ▼ ▲ ▼ ▲ ▼ ▲
+      2 ▲ ▼ ▲ ▼ ▲ ▼
+      3 ▼ ▲ ▼ ▲ ▼ ▲
+      4 ▲ ▼ ▲ ▼ ▲ ▼
+      5 ▼ ▲ ▼ ▲ ▼ ▲
+      6 ▲ ▼ ▲ ▼ ▲ ▼
+```
+
+... where vertically as well as horizontally, the cells would alternate pointing directions (downwards vs. upwards pointing). Similar to in the hex grid, horizontally, the spacing between elements need to be squished, hence the slightly high Y:X (aspect ratio)[#aspect-ratios] (though not as high as for the hex grid)
+
 ##### Usage of Matrix Operations
 <sup>[Back to list of contents](#contents)</sup>
 
+Snippet from the step function for Game of Life
+
+```MATLAB
+% N's elements are the number of alive neighbours the cell in the same position in A0 has
+N += conv2(A0, [1 1 1;
+                1 0 1;
+                1 1 1], 'same');
+
+% Apply the birth rule
+A1 += (~A0.*N == 3);
+
+% Apply the survival rule
+A1 += (A0.*N == 2) + (A0.*N == 3);
+```
+
 ###### Binary & Boolean Operations
 <sup>[Back to list of contents](#contents)</sup>
+
+Let us assume we have the following matrices
+
+```
+ Current state     Number of alive neighbours of each cell in A
+A0 = 0 0 0 0 0 0   N = 0 1 1 1 0 0
+     0 0 1 0 0 0       0 1 1 2 1 0
+     0 0 0 1 0 0       0 2 3 2 1 0
+     0 0 1 0 0 0       0 1 1 2 1 0
+     0 0 0 0 0 0       0 1 1 1 0 0
+     0 0 0 0 0 0       0 0 0 0 0 0
+```
+
+When the statement `A1 += (~A0.*N == 3);` is run, these occur:
+1. A0 is negated (~A0)
+2. The negation of A0 is multiplied by N (~A0*N)
+3. The resulting product is operated with the boolean operator == with 3 (~A0*N == 3)
+4. The result of the boolean operation is added to A1
+
+How it looks like. (Not really as the matrices should be sparse and hence 0s do not really exist in memory)
+
+```
+     A0                   Negation of A0
+A0 = 0 0 0 0 0 0     ~A0 = 1 1 1 1 1 1
+     0 0 1 0 0 0           1 1 0 1 1 1
+     0 0 0 1 0 0           1 1 1 0 1 1
+     0 0 1 0 0 0           1 1 0 1 1 1
+     0 0 0 0 0 0           1 1 1 1 1 1
+     0 0 0 0 0 0           1 1 1 1 1 1
+
+                           ~A0 times N    Evaluates to 1 where "~A0*N==3" are true
+ N = 0 1 1 1 0 0   ~A0*N = 0 1 1 1 0 0  ~A0*N==3 = 0 0 0 0 0 0
+     0 1 1 2 1 0           0 1 0 2 1 0             0 0 0 0 0 0
+     0 2 3 2 1 0           0 2 3 0 1 0             0 0 1 0 0 0
+     0 1 1 2 1 0           0 1 0 2 1 0             0 0 0 0 0 0
+     0 1 1 1 0 0           0 1 1 1 0 0             0 0 0 0 0 0
+     0 0 0 0 0 0           0 0 0 0 0 0             0 0 0 0 0 0
+
+```
+
+A1 += (~A0.*N == 3) then results in 1 being added to position (3,3) in the matrix A1, which is akin to running the following code
+
+```MATLAB
+for r in 1:6
+  for c in 1:6
+    if ~A0
+      if N==3
+        A1 = 1;
+      end;
+    end;
+  end;
+end;
+```
+
+which is not only a lot to read visually, but also computationally inefficient as the operation is done for rows*cols times, whereas in sparse matrix operations, some low level operations involving 0s are not even considered.
+
+Thus the code
+
+```MATLAB
+% Apply birth and survival rule
+for r in 1:6
+  for c in 1:6
+    if ~A0(r,c)
+      if N==3
+        % Birth condition met
+        A1(r,c) = 1; % Set A1 in this position to 1
+      end;
+    elseif N==2 || N==3
+      % Survival condition met
+      A1(r,c) = 1; % Set A1 in this position to 1
+    end;
+  end;
+end;
+```
+
+can be better written (and more efficiently executed) as
+
+```MATLAB
+% Add one to A1 where currently dead cells have 3 neighbours (birth condition met)
+A1 += (~A0.*N == 3);
+
+% Add one to A1 where currently alive cells have 2 or 3 neighbours (survival condition met)
+A1 += (A0.*N == 2) + (A0.*N == 3);
+```
 
 ###### Usage of `conv2`
 <sup>[Back to list of contents](#contents)</sup>
@@ -244,3 +485,4 @@ endfor
 
 ### Maintaining Data for Re-Displaying All Final States
 <sup>[Back to list of contents](#contents)</sup>
+

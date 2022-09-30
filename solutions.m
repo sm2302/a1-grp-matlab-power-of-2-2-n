@@ -243,9 +243,11 @@ endfor
 % Display all in a single figure
 fig2 = figure(2);
 
+markerScale = 0.3; titleScale = 0.5;
+
 for j = 1:8 % Limit to only 8 because on screen a 2by4 grid is somewhat optimal
   subplot(2,4,j);
-  plotGrid(data{j,1}, data{j,2}, data{j,3}, 0.3*markerScale);
+  plotGrid(data{j,1}, data{j,2}, data{j,3}, markerScale, titleScale);
 endfor
 
 % To save these subplots to an image, maximize Figure 2 which contains subplots

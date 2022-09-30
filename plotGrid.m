@@ -1,4 +1,4 @@
-function plotGrid (A, shape, label, markerScale = 1)
+function plotGrid (A, shape, label, markerScale = 1, titleScale = 1)
 
   baseMarkerSize = 500;
 
@@ -41,7 +41,7 @@ function plotGrid (A, shape, label, markerScale = 1)
 
   endswitch
 
-  title(['\fontsize{', sprintf("%d",44*markerScale), '}', label]);
+  title(['\fontsize{', sprintf("%d",44*titleScale), '}', label]);
   drawnow;
 
 endfunction
