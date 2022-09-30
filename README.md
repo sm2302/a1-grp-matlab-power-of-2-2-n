@@ -1,26 +1,94 @@
-# Conway's Game of Life
+# Contents
+1. [Animations (Solution Output)](#animations-solution-output)
+2. [Relevant Files' Descriptions](#relevant-files-descriptions)
+3. [Procedure in running each Cellular Automaton](#procedure-in-running-each-cellular-automaton)
+   1. [Initialization or Loading of a Start State](#initialization-or-loading-of-a-start-state)
+   2. [Within the Loop](#within-the-loop)
+      1. [The Plot Function `plotGrid`](#the-plot-function-plotgrid)
+         1. [Plot Marker Configurations](#plot-marker-configurations)
+         2. [Aspect Ratios](#aspect-ratios)
+         3. [Title Setting](#title-setting)
+      2. [The Step Function](#the-step-function)
+         1. [Usage of `ncAlive = nnz(A)` and `spalloc`](#usage-of-ncalive--nnza-and-spalloc)
+         2. [Coordinates System](#coordinates-system)
+            1. [Hexagonal Grid](#hexagonal-grid)
+            2. [Triangular Grid](#triangular-grid)
+         3. [Usage of Matrix Operations](#usage-of-matrix-operations)
+            1. [Binary & Boolean Operations](#binary--boolean-operations)
+            2. [Usage of `conv2`](#usage-of-conv2)
+            3. [Usage of `getLattice`](#usage-of-getlattice)
+         4. [Neighbourhood Computation](#neighbourhood-computation)
+         5. [Next Cell State Computation](#next-cell-state-computation)
+   3. [Maintaining Data for Re-Displaying All Final States](#maintaining-data-for-re-displaying-all-final-states)
 
-> **Game of Life** is a world that consists of an infinite, two-dimensional square grid. 
-> Each cell in the grid can be *alive* or *dead*. Every cell interacts with its eight 
-> neighbours (i.e horizontally, vertically and diagonally adjacent cells). 
+## Animations (Solution Output)
+<sup>[Back to list of contents](#contents)</sup>
 
-![](gol_glider_gun.png)
+## Relevant Files' Descriptions
+<sup>[Back to list of contents](#contents)</sup>
+| File | Description |
+| ----- | ----------- |
+| solutions.m | The main script where all functions are pieced together to demonstrate their collective result |
+| plotGrid.m | The function which handles all plot/figure related procedures, e.g. setting the figure title, aspect ratio, displaying each cell according to its type (e.g. downward pointing or upward pointing triangle), etc |
+| **stepFunction** <br /> (folder) | Folder containing all step functions that generally take in a current state `A0` as argument and computes and returns the next state `A1` |
+| stepLife.m | The most basic and most concise step function. Refer to this file first in understanding the procedures common in all step functions. |
+| stepSquare.m | Almost exactly similar to stepLife, except that it expects 2 additional input arguments, the birth condition and survival condition (vector of numbers of neighbours to cause birth or survival) |
+| stepTriangle.m | Like stepLife.m, it has fixed rules (for simplicity), but has two different methods of computing neighbourhood depending on the cell's location in the grid (upward pointing or downward pointing triangle) |
+| getLattice.m | Generates one of two types of checkerboard pattern, i.e., either starting with 1, or starting with 0, of size determined by the `height` and `width` values passed as numeric arguments (along with the single character argument, the lattice `type`) |
 
-At each step the cells are updates according to the following set of rules:
-1. Any live cell with fewer than two live neighbours dies (underpopulation).
-2. Any live cell with two or three live neighbours lives on to the next generation.
-3. Any live cell with more than three live neighbours dies (overpopulation).
-4. Any dead cell with exactly three live neighbours becomes a live cell (reproduction).
+## Procedure in running each Cellular Automaton
+<sup>[Back to list of contents](#contents)</sup>
 
-## Work Log
+### Initialization or Loading of a Start State
+<sup>[Back to list of contents](#contents)</sup>
 
-<table>
-  <tr>
-    <th>Item</th><th>Date(s)</th><th>Description</th>
-  </tr>
-  <tr>
-    <td>Assignment opened</td>
-    <td>17/9/2022</td>
-    <td>Members able to start understanding the objective of the assignment, and test for or compare code approaches to be used as possible solution parts</td>
-  </tr>
-</table>
+### Within the Loop
+<sup>[Back to list of contents](#contents)</sup>
+
+#### The Plot Function `plotGrid`
+<sup>[Back to list of contents](#contents)</sup>
+
+##### Plot Marker Configurations
+<sup>[Back to list of contents](#contents)</sup>
+
+##### Aspect Ratios
+<sup>[Back to list of contents](#contents)</sup>
+
+##### Title Setting
+<sup>[Back to list of contents](#contents)</sup>
+
+#### The Step Function
+<sup>[Back to list of contents](#contents)</sup>
+
+##### Usage of `ncAlive = nnz(A)` and `spalloc`
+<sup>[Back to list of contents](#contents)</sup>
+
+##### Coordinates System
+<sup>[Back to list of contents](#contents)</sup>
+
+###### Hexagonal Grid
+<sup>[Back to list of contents](#contents)</sup>
+
+###### Triangular Grid
+<sup>[Back to list of contents](#contents)</sup>
+
+##### Usage of Matrix Operations
+<sup>[Back to list of contents](#contents)</sup>
+
+###### Binary & Boolean Operations
+<sup>[Back to list of contents](#contents)</sup>
+
+###### Usage of `conv2`
+<sup>[Back to list of contents](#contents)</sup>
+
+###### Usage of `getLattice`
+<sup>[Back to list of contents](#contents)</sup>
+
+##### Neighbourhood Computation
+<sup>[Back to list of contents](#contents)</sup>
+
+##### Next Cell State Computation
+<sup>[Back to list of contents](#contents)</sup>
+
+### Maintaining Data for Re-Displaying All Final States
+<sup>[Back to list of contents](#contents)</sup>
