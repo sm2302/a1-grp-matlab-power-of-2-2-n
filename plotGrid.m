@@ -10,6 +10,12 @@ function plotGrid (A, shape, label, markerScale = 1)
 
       daspect([1 1]);
 
+    case "hexagon"
+
+      spy(A, '*k', baseMarkerSize/size(A,1)*markerScale);
+
+      daspect([1.75 1]);
+
     case "triangle"
 
       [h, w] = size(A);
