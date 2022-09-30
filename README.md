@@ -46,10 +46,18 @@
     <td><img src="animations/REPLICATOR.gif"></td>
     <td><img src="animations/SEEDS.gif"></td>
   </tr>
+  <tr>
+    <td>Birth=<code>1,3,5,7</code> Survival=<code>1,3,5,7</code></td>
+    <td>Birth=<code>2</code> Survival=<code>NEVER</code></td>
+  </tr>
   </tr>
   <tr>
     <td><img src="animations/LIFE WITHOUT DEATH.gif"></td>
     <td><img src="animations/DIAMOEBA.gif"></td>
+  </tr>
+   <tr>
+    <td>Birth=<code>3</code> Survival=<code>ANY</code></td>
+    <td>Birth=<code>3,5,6,7,8</code> Survival=<code>5,6,7,8</code></td>
   </tr>
 </table>
 
