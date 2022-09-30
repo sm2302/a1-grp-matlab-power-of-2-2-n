@@ -190,6 +190,10 @@ for i = 1:N
 endfor
 ```
 
+<div align=center>
+   <img width=500 src="animations/Gosper & Simkin Glider Guns.gif">
+</div>
+
 ### Within the Loop
 <sup>[Back to list of contents](#contents)</sup>
 
