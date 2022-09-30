@@ -24,6 +24,35 @@
 ## Animations (Solution Output)
 <sup>[Back to list of contents](#contents)</sup>
 
+<table align=center>
+  <tr><th align=center colspan=2>
+    Cellular Automata in Different Grids
+  <th></tr>
+  <tr>
+    <td><img src="animations/Game of LIFE.gif"></td>
+    <td><img src="animations/Tri-Grid.gif"></td>
+  </tr>
+  <tr>
+    <td><img src="animations/Hex-Grid.gif"></td>
+    <td><img src="animations/Hex-Grid with 3 states.gif"></td>
+  </tr>
+</table>
+
+<table align=center>
+  <tr><th align=center colspan=2>
+    Square Grid Cellular Automata with Different Rules
+  <th></tr>
+  <tr>
+    <td><img src="animations/REPLICATOR.gif"></td>
+    <td><img src="animations/SEEDS.gif"></td>
+  </tr>
+  </tr>
+  <tr>
+    <td><img src="animations/LIFE WITHOUT DEATH.gif"></td>
+    <td><img src="animations/DIAMOEBA.gif"></td>
+  </tr>
+</table>
+
 ## Relevant Files' Descriptions
 <sup>[Back to list of contents](#contents)</sup>
 | File | Description |
