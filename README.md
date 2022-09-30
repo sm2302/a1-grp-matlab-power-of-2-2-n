@@ -43,8 +43,56 @@
 ## Procedure in running each Cellular Automaton
 <sup>[Back to list of contents](#contents)</sup>
 
+In our main [`solutions.m`](solutions.m) script consists of 8 Cellular Automata runs, all done with the same procedure, as such:
+
+```MATLAB
+% Example: The Game of LIFE; Other Cellular Automata runs too follow the same format.
+label = "Game of LIFE";
+grid = "square";
+stepFn = @stepLife; N = 100;
+A = sprand(200, 200,0.075) > 0;
+
+for i = 1:N
+  plotGrid(A, grid, label, markerScale);
+  A = stepFn(A);
+endfor
+
+data(1,1:3) = {A, grid, label};
+```
+
+...which is:
+- Specifying variables to be used subsequent function calls:
+   - `label` - name to display on figure
+   - `grid` - shape of grid which determines how the cells will be plotted
+   - `stepFn` - which out of the five [step functions](#the-step-function) to use for next cell state computation
+   - `A` - 2X2 sparse matrix representing cells' states at the start of the loop, which is also updated in each iteration
+   - `N` - number of generations to run consecutively i.e., how many times the for-loop will run
+   - `markerScale` - how big or small to make the plot marker
+- Running a `for-loop` for `N` iterations, in which each generation will be [plotted](#the-plot-function-plotgrid), and `A` be updated to the [next state computed](#the-step-function)
+- Its latest state `A`, along with values for `grid` and `label` will be saved to a cell array (`data` to be used at the end of the script in a combined subplot figure)[#maintaining-data-for-re-displaying-all-final-states].
+
+
 ### Initialization or Loading of a Start State
 <sup>[Back to list of contents](#contents)</sup>
+
+
+Before running a Cellular Automata "simulation", its must start with an existing state, in the form of a sparse matrix. For most of our examples in the [`solutions.m`](solutions.m) script, we have used the `sprand` function as such:
+
+```MATLAB
+A = sprand(height, width, density)
+```
+
+where `A` is the start state to be assigned a value, and `sprand` used in this manner produces a sparse matrix of random numbers (0 to 1) at a certain amount of random positions determined by the density number.
+
+`Count of filled positions = Total positions * density`. E.g. `sparse(2, 5, 0.3)` may produce a matrix of these values:
+
+```
+0.1   0.4     0     0     0
+  0     0     0   0.3     0
+```
+
+... though it will be in the form of a sparse matrix, meaning each non-zero element's row and columnt coordinates are kept in memory and the `0`s are ignored.
+
 
 ### Within the Loop
 <sup>[Back to list of contents](#contents)</sup>
