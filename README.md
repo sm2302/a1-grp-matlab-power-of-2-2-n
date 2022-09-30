@@ -93,6 +93,22 @@ where `A` is the start state to be assigned a value, and `sprand` used in this m
 
 ... though it will be in the form of a sparse matrix, meaning each non-zero element's row and columnt coordinates are kept in memory and the `0`s are ignored.
 
+Alternatively, any saved state can be used too as the initial state, such as:
+
+```MATLAB
+% Example:  CELLULAR AUTOMATA - FROM SAVED STATES
+label = "Gosper & Simkin Glider Guns in Game of LIFE";
+grid = "square";
+stepFn = @stepLife;
+
+load savedStates guns;
+A = guns; N = 240;
+
+for i = 1:N
+  plotGrid(A, grid, label, markerScale/1.3);
+  A = stepFn(A);
+endfor
+```
 
 ### Within the Loop
 <sup>[Back to list of contents](#contents)</sup>
