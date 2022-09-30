@@ -9,7 +9,7 @@
          2. [Aspect Ratios](#aspect-ratios)
          3. [Title Setting](#title-setting)
       2. [The Step Function](#the-step-function)
-         1. [Usage of `ncAlive = nnz(A)` and `spalloc`](#usage-of-ncalive--nnza-and-spalloc)
+         1. [Usage of `ncAlive = nnz(A0)` and `spalloc`](#usage-of-ncalive--nnza0-and-spalloc)
          2. [Coordinates System](#coordinates-system)
             1. [Hexagonal Grid](#hexagonal-grid)
             2. [Triangular Grid](#triangular-grid)
@@ -305,7 +305,7 @@ N = spalloc(h, w, ncAlive*3);
 A1 = spalloc(h, w, ncAlive);
 ```
 
-N in any step function is the sparse matrix whose elements are the number of alive neighbours the corresponding cell in the same position in matrix A0 has.
+N in any step function is the sparse matrix whose elements are the number of alive neighbours of the corresponding cells in A0.
 
 A1 is the sparse matrix that would hold `1`s where there are alive cells in the next state
 
@@ -400,29 +400,29 @@ A0 = 0 0 0 0 0 0   N = 0 1 1 1 0 0
 ```
 
 When the statement `A1 += (~A0.*N == 3);` is run, these occur:
-1. A0 is negated (~A0)
-2. The negation of A0 is multiplied by N (~A0*N)
-3. The resulting product is operated with the boolean operator == with 3 (~A0*N == 3)
-4. The result of the boolean operation is added to A1
+1. A0 is negated i.e. `~A0`
+2. The negation of A0 is multiplied by N i.e. `~A0*N`
+3. The resulting product is operated with the boolean operator == with 3 i.e. `~A0*N == 3`
+4. The result of the boolean operation is added to A1 i.e. `A1 += (~A0*N == 3)`
 
 How it looks like. (Not really as the matrices should be sparse and hence 0s do not really exist in memory)
 
 ```
-     A0                   Negation of A0
-A0 = 0 0 0 0 0 0     ~A0 = 1 1 1 1 1 1
-     0 0 1 0 0 0           1 1 0 1 1 1
-     0 0 0 1 0 0           1 1 1 0 1 1
-     0 0 1 0 0 0           1 1 0 1 1 1
-     0 0 0 0 0 0           1 1 1 1 1 1
-     0 0 0 0 0 0           1 1 1 1 1 1
+                      Negation of A0
+A0 = 0 0 0 0 0 0      ~A0 = 1 1 1 1 1 1
+     0 0 1 0 0 0            1 1 0 1 1 1
+     0 0 0 1 0 0            1 1 1 0 1 1
+     0 0 1 0 0 0            1 1 0 1 1 1
+     0 0 0 0 0 0            1 1 1 1 1 1
+     0 0 0 0 0 0            1 1 1 1 1 1
 
-                           ~A0 times N    Evaluates to 1 where "~A0*N==3" are true
- N = 0 1 1 1 0 0   ~A0*N = 0 1 1 1 0 0  ~A0*N==3 = 0 0 0 0 0 0
-     0 1 1 2 1 0           0 1 0 2 1 0             0 0 0 0 0 0
-     0 2 3 2 1 0           0 2 3 0 1 0             0 0 1 0 0 0
-     0 1 1 2 1 0           0 1 0 2 1 0             0 0 0 0 0 0
-     0 1 1 1 0 0           0 1 1 1 0 0             0 0 0 0 0 0
-     0 0 0 0 0 0           0 0 0 0 0 0             0 0 0 0 0 0
+                   Elem-multiplication    1 where "~A0.*N==3" are true
+ N = 0 1 1 1 0 0   ~A0.*N = 0 1 1 1 0 0   ~A0*N==3 = 0 0 0 0 0 0
+     0 1 1 2 1 0            0 1 0 2 1 0              0 0 0 0 0 0
+     0 2 3 2 1 0            0 2 3 0 1 0              0 0 1 0 0 0
+     0 1 1 2 1 0            0 1 0 2 1 0              0 0 0 0 0 0
+     0 1 1 1 0 0            0 1 1 1 0 0              0 0 0 0 0 0
+     0 0 0 0 0 0            0 0 0 0 0 0              0 0 0 0 0 0
 
 ```
 
@@ -442,8 +442,8 @@ end;
 
 which is not only a lot to read visually, but also computationally inefficient as the operation is done for rows*cols times, whereas in sparse matrix operations, some low level operations involving 0s are not even considered.
 
-Thus the code
-
+Thus the code 
+  
 ```MATLAB
 % Apply birth and survival rule
 for r in 1:6
@@ -474,15 +474,358 @@ A1 += (A0.*N == 2) + (A0.*N == 3);
 ###### Usage of `conv2`
 <sup>[Back to list of contents](#contents)</sup>
 
+Snippet from `stepLife.m`/`stepSquare.m`
+
+```MATLAB
+N += conv2(A0, [1 1 1;
+                1 0 1;
+                1 1 1], 'same');
+```
+
+> A convolution is a type of matrix operation, consisting of a kernel (which is a small matrix of weights), that slides over input data performing element-wise multiplication with the part of the input it is on, then summing the results into an output. (Source: [Papers with Code](https://paperswithcode.com/method/convolution)
+
+> `conv2(A,B)` returns the two-dimensional convolution of matrices A and B. (Source: [MATLAB docs on conv2](https://www.mathworks.com/help/matlab/ref/conv2.html#bvgtfv6))
+
+So with the example state:
+
+```
+A0 = 0 0 0 1 1
+     0 0 0 0 1
+     0 0 0 0 1
+     0 1 0 0 0
+     0 0 0 0 0
+```
+
+,
+
+```MATLAB
+conv2(A0, [1 1 1;
+           1 0 1;
+           1 1 1]);
+```
+
+would be evaluated as summation of all these
+
+```
+0 0 0 1 1 0 0   0 0 0 0 1 1 0   0 0 0 0 0 1 1
+0 0 0 0 1 0 0   0 0 0 0 0 1 0   0 0 0 0 0 0 1
+0 0 0 0 1 0 0   0 0 0 0 0 1 0   0 0 0 0 0 0 1
+0 1 0 0 0 0 0   0 0 1 0 0 0 0   0 0 0 1 0 0 0
+0 0 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 0
+0 0 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 0
+0 0 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 0
+
+0 0 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 0
+0 0 0 1 1 0 0   0 0 0 0 0 0 0   0 0 0 0 0 1 1
+0 0 0 0 1 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 1
+0 0 0 0 1 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 1
+0 1 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 1 0 0 0
+0 0 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 0
+0 0 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 0
+
+0 0 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 0
+0 0 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 0
+0 0 0 1 1 0 0   0 0 0 0 1 1 0   0 0 0 0 0 1 1
+0 0 0 0 1 0 0   0 0 0 0 0 1 0   0 0 0 0 0 0 1
+0 0 0 0 1 0 0   0 0 0 0 0 1 0   0 0 0 0 0 0 1
+0 1 0 0 0 0 0   0 0 1 0 0 0 0   0 0 0 1 0 0 0
+0 0 0 0 0 0 0   0 0 0 0 0 0 0   0 0 0 0 0 0 0
+```
+
+resulting in
+
+```
+0 0 0 1 2 2 1
+0 0 0 1 2 2 2
+0 0 0 1 4 3 3
+0 1 1 1 2 1 2
+0 1 0 1 1 1 1
+0 1 1 1 0 0 0
+0 0 0 0 0 0 0
+```
+
+> conv2(___,shape) returns a subsection of the convolution according to shape. For example, C = conv2(A,B,'same') returns the central part of the convolution, which is the same size as A (Source: [MATLAB docs on conv2](https://www.mathworks.com/help/matlab/ref/conv2.html#bvgtfv6))
+
+Hence
+
+```MATLAB
+conv2(A0, [1 1 1;
+           1 0 1;
+           1 1 1], 'same');
+```
+
+returns
+
+```
+0 0 1 2 2
+0 0 1 4 3
+1 1 1 2 1
+1 0 1 1 1
+1 1 1 0 0
+```
+
+which is the actually N, the numbers of alive neighbours of the corresponding cell in
+
+```
+A0 = 0 0 0 1 1
+     0 0 0 0 1
+     0 0 0 0 1
+     0 1 0 0 0
+     0 0 0 0 0
+```
+
 ###### Usage of `getLattice`
 <sup>[Back to list of contents](#contents)</sup>
+
+`getLattice` is just a function that generates a matrix of alternating `1`s and `0`s in the manner below:
+
+```
+Type A        Type B
+1 0 1 0 1 0   0 1 0 1 0 1
+0 1 0 1 0 1   1 0 1 0 1 0
+1 0 1 0 1 0   0 1 0 1 0 1
+0 1 0 1 0 1   1 0 1 0 1 0
+1 0 1 0 1 0   0 1 0 1 0 1
+0 1 0 1 0 1   1 0 1 0 1 0
+```
+
+with variable width and height.
+
+It is used in filtering matrices in the case of hexagonal grid and triangle grid where a an ["alternating" system of coordinates](#hexagonal-grid) is used. For example, when an starting state is initialized via. `A = sprand(5, 7, 0.4) > 0`, the matrix below may be produced
+
+```
+1 0 0 1 0 0 0
+0 1 0 1 0 0 0
+0 0 1 1 0 0 0
+0 0 0 1 1 0 0
+0 0 0 1 0 1 0
+```
+
+However if it were a hexagonal grid, some of the 1s would be in positions that do not actually exist due to the [coordinates system](#hexagonal-grid).
+
+```
+Row\Col 1 2 3 4 5 6
+      1 ⬡   ⬡   ⬡
+      2   ⬡   ⬡   ⬡
+      3 ⬡   ⬡   ⬡
+      4   ⬡   ⬡   ⬡
+      5 ⬡   ⬡   ⬡
+      6   ⬡   ⬡   ⬡
+```
+
+The invalid cells would have to be eliminated, and this can be done by element-wise multiplying the state matrix A with a checkerboard pattern from `getLattice` of the same dimensions
+
+```
+       A         L=getLattice('A',h,w)       A.*L
+ 1 0 0 1 0 0 0       1 0 1 0 1 0 1       1 0 0 0 0 0 0
+ 0 1 0 1 0 0 0       0 1 0 1 0 1 0       0 1 0 1 0 0 0
+ 0 0 1 1 0 0 0       1 0 1 0 1 0 1       0 0 1 0 0 0 0
+ 0 0 0 1 1 0 0       0 1 0 1 0 1 0       0 0 0 1 0 0 0
+ 0 0 0 1 0 1 0       1 0 1 0 1 0 1       0 0 0 0 0 0 0
+
+Valid cells in A = A.*L
+ 1   0   0   0
+   1   1   0
+ 0   1   0   0
+   0   1   0
+ 0   0   0   0
+```
+
+Similarly, in the triangular grid, both types of lattice 'A' and 'B' are used each to filter one of the two types of triangles ▼ and ▲
+
+
+Snippet from `plotGrid.m`
+
+```MATLAB
+spy(A.*getLattice('A', h, w), 'vk', markerSize);
+hold on;
+spy(A.*getLattice('B', h, w), '^k', markerSize);
+hold off;
+```
+
+would result in a state A e.g.
+
+```
+|0 0 1|
+|0 0 1|
+|0 1 0|
+```
+
+to be plotted by the first spy call as
+
+```
+|    ▼|
+|     |
+|     |
+(not yet in [1.3 1] aspect ratio)
+```
+
+then on the second spy call be plotted as
+
+```
+|    ▼|
+|    ▲|
+|  ▲  |
+(not yet in [1.3 1] aspect ratio)
+```
 
 ##### Neighbourhood Computation
 <sup>[Back to list of contents](#contents)</sup>
 
+Neighbourhoods are computed with the [use of the `conv2` function](#usage-of-conv2).
+
+In fact, the one location where it is used is the only difference in computation from one grid to another
+
+___
+
+Snippet from `stepLife.m`/`stepSquare.m`
+
+```MATLAB
+  N += conv2(A0, [1 1 1;
+                  1 0 1;
+                  1 1 1], 'same');
+```
+
+... which is straightforward A0 is directly used as argument to the conv2 along with the the 3x3 kernel that represents the eight positions adjacent to a cell in a square grid
+
+___
+
+In `stepTriangle.m`
+
+```MATLAB
+                                                    % ▲▼▲▼▲
+  N += conv2(A0.*getLattice('A', h, w), [1 1 1 1 1; % ▼▲v▲▼
+                                         1 1 0 1 1; %  ▼▲▼
+                                         0 1 1 1 0], 'same');
+                                                    %  ▲▼▲
+  N += conv2(A0.*getLattice('B', h, w), [0 1 1 1 0; % ▲▼^▼▲
+                                         1 1 0 1 1; % ▼▲▼▲▼
+                                         1 1 1 1 1], 'same');
+```
+
+... two kernels are used, one for each type of triangle ▼ and ▲, whose neighbourhoods are computed in separate calls to conv2. Cell A0 is filtered by either types of checkered pattern generated by [`getLattice`](#usage-of-getlattice) so that only cells in downward pointing triangles are passed to the first conv2 call, while cells in upward pointing triangles are passed in the second call.
+
+In the triangular grid, cells considered neighbours are the ones touching not only on their edges, but also on their vertices, resulting in a total of 12 neighbours per cell
+___
+
+`stepHex.m`
+
+```MATLAB
+  N += conv2(A0, [0 1 0 1 0;
+                  1 0 0 0 1;
+                  0 1 0 1 0], 'same');
+```
+
+... is similar to `stepLife.m`/`stepSquare.m` in that only one kernel is used. The staggered arrangement and horizontal distance is due to how the cells are arranged in the [coordinates system](#hexagonal-grid) used and which to be considered neighbours in a the grid
+___
+
+Snippet from `stepHex3.m`
+
+```MATLAB
+  N += conv2((A0==1), [0 1 0 1 0;
+                       1 0 0 0 1; % Blue cell, state 1
+                       0 1 0 1 0], 'same');
+
+  N += conv2((A0==2), [0 2 0 2 0;
+                       2 0 0 0 2; % Red cell, state 2
+                       0 2 0 2 0], 'same');
+```
+
+.. is similar to `stepHex.m` with the exception that red cells increment 2 to their neighbouring cells' N value.
+
 ##### Next Cell State Computation
 <sup>[Back to list of contents](#contents)</sup>
+
+From the original question:
+> At each step the cells are updated according to the following set of rules:
+> 1. Any live cell with fewer than two live neighbours dies (underpopulation).
+> 2. Any live cell with two or three live neighbours lives on to the next generation.
+> 3. Any live cell with more than three live neighbours dies (overpopulation).
+> 4. Any dead cell with exactly three live neighbours becomes a live cell (reproduction).
+
+As the other Cellular Automata we have explored have the same format of rules but varying numbers (with the exception of `Hexagon3` in which cells have three possible states instead of two), these can be generalized into:
+1. Any live cell that has $s \in sr$ amount of neighbours lives on to the next generation (survival)
+2. Any dead cell that has $b \in br$ amount of neighbours becomes a live cell (reproduction)
+3. Cells that do not meet any of the first two rules are assumed to be/stay dead.
+
+where
+- $sr$ is an array of numbers, which if a live cell's amount of live neighbours matches any of its elements, the cell would continue to live
+- $br$ is an array of numbers, which if a dead cell's amount of live neighbours matches any of its elements, the cell would become a live cell on the next generation
+
+`stepSquare.m`, which accepts the birth $br$ and survival $sr$ rules as argument
+
+```MATLAB
+  % Apply birth rule
+  for n = br
+    if n == 0
+      A1 += (~A0.*~N);
+      continue;
+    endif
+    A1 += (~A0.*N == n);
+  endfor
+
+  % Apply survival rule
+  for n = sr
+    if n == 0
+      A1 += (A0.*~N);
+      continue;
+    endif
+    A1 += (A0.*N == n);
+  endfor
+```
+
+How these [binary & boolean operations](#binary--boolean-operations) work in emulating conditional logic and iterating through individual elements, but more efficiently, as explained in a [previous section](#binary--boolean-operations).
+
+For loop are still required, however, to loop through the arrays $sr$ and $br$.
+
+The reason for singling out the conditions where n == 0 is that `A1 += (A0.*N == n)` or `A1 += (~A0.*N == n)` would not work as intended when 0 is in $sr$ or $br$ because `(A0.*N == n)` would have a value 1 wherever there is a dead cell and `(~A0.*N == n) would return 1 wherever there is a live cell, regardless of the value of N.
+
+The code below 
+
+```MATLAB
+  % Apply birth rule
+  for n = br
+    A1 += (~A0.*N == n);
+  endfor
+
+  % Apply survival rule
+  for n = sr
+    A1 += (A0.*N == n);
+  endfor
+```
+
+would work for most of the Cellular Automata variants but not for those with 0 in either their $sr$ or $br$ arrays (such as in [Life without Death](#animations-solution-output) due to the reasons mentioned in the previous paragraph.
 
 ### Maintaining Data for Re-Displaying All Final States
 <sup>[Back to list of contents](#contents)</sup>
 
+```MATLAB
+data(1,1:3) = {A, grid, label};
+```
+
+is written at every CA run after the for loops. This is to store in the data cell their:
+1. Final state `A`
+2. Grid shape `grid`
+3. Figure title `label`
+
+They are then referenced at the final code segment at the end of the `solutions.m` script
+
+```MATLAB
+% COMBINED SUBPLOTS OF FIRST 8 CA RUNS' FINAL STATES
+
+% Display all in a single figure
+fig2 = figure(2);
+
+markerScale = 0.3; titleScale = 0.5;
+
+for j = 1:8 % Limit to only 8 because on screen a 2by4 grid is somewhat optimal
+  subplot(2,4,j);
+  plotGrid(data{j,1}, data{j,2}, data{j,3}, markerScale, titleScale);
+endfor
+```
+
+which results in a figure of subplots as shown below
+
+<div align=center>
+  <img src=FinalStates.png />
+</div>

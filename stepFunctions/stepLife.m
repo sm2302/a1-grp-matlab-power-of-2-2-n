@@ -1,10 +1,11 @@
 function A1 = stepLife(A0)
 
+  [h, w] = size(A0);
+
   % Number of alive cells to roughly estimate room to allocate for A1 and N elems
   ncAlive = nnz(A0);
 
   % Initialize empty matrices N & A1
-  [h, w] = size(A0);
   N = spalloc(h, w, ncAlive*4); % each cell's number of neighbours
   A1 = spalloc(h, w, ncAlive); % each cell's state in the next gen
 

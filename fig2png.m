@@ -14,4 +14,8 @@ function fig2png (fig, filename)
   [A,map] = rgb2ind(im);
   % Write the image to a .png file
   imwrite(A, map, sprintf("%s.png", filename));
+
+  % Inform progress thru command window
+  fprintf("Writing frame to %s.png complete.\n", fullname);
+
 endfunction
