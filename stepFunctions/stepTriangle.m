@@ -10,13 +10,13 @@ function A1 = stepTriangle (A0)
   A1 = spalloc(h, w, ncAlive); % each cell's state in the next gen
 
   % Each alive cell ("1"s in A0) will add 1 to its neighbouring cell's N value
-                                                    % ▲▼▲▼▲
-  N += conv2(A0.*getLattice('A', h, w), [1 1 1 1 1; % ▼▲v▲▼
-                                         1 1 0 1 1; %  ▼▲▼
+                                                    % ▲ ▼ ▲ ▼ ▲
+  N += conv2(A0.*getLattice('A', h, w), [1 1 1 1 1; % ▼ ▲ v ▲ ▼
+                                         1 1 0 1 1; %   ▼ ▲ ▼
                                          0 1 1 1 0], 'same');
-                                                    %  ▲▼▲
-  N += conv2(A0.*getLattice('B', h, w), [0 1 1 1 0; % ▲▼^▼▲
-                                         1 1 0 1 1; % ▼▲▼▲▼
+                                                    %   ▲ ▼ ▲
+  N += conv2(A0.*getLattice('B', h, w), [0 1 1 1 0; % ▲ ▼ ^ ▼ ▲
+                                         1 1 0 1 1; % ▼ ▲ ▼ ▲ ▼
                                          1 1 1 1 1], 'same');
 
   % Apply birth rule. (B48)

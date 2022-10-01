@@ -38,10 +38,10 @@
   </tr>
   <tr>
     <td>
-      Frequently occuring activity patterns include <i>still-life</i>s (a group of neighbouring cells that do not evolve from one generation to the next), <i>oscillators</i> (group of cells that evolve but return to the same pattern after a certain number of generations (know as its period), and <i>spaceships</i> (same as oscillators, but which end up on a different location after each period)
+      Frequently occuring activity patterns include <i>still-life</i>s (neighbourhood cells that stay in one state from one generation to the next), <i>oscillators</i> (neighbourhood of cells that evolve on each step but return to the same pattern after a certain number of generations (known as its period), and <i>spaceships</i> (same as oscillators, but which end up on a different location after each period)
     </td>
     <td>
-      It is also possible to have the LIFE-like patterns occur in the triangular grid, with the rules Birth=<code>4,8</code> and Survival=<code>4,5,6</code>, albeit being rarer than in the Game of LIFE. Above shows the occurance of spaceships from a randomly generated initial state (but now saved in <a href=#relevant-files-descriptions>savedStates.mat</a>
+      LIFE-like patterns can also occur in the triangular grid, with the rules Birth=<code>4,8</code> and Survival=<code>4,5,6</code>, albeit being rarer than in the Game of LIFE. Above shows the occurance of spaceships from a randomly generated initial state (but now saved in <a href=#relevant-files-descriptions>savedStates.mat</a>
     </td
   </tr>
   <tr>
@@ -54,10 +54,10 @@
   <tr>
   <tr>
     <td>
-      We have not been able to find any combination of rules that can fascilitate the occurance of activity patterns that closely resembles the Game of LIFE. However using the rules Birth=<code>3,4</code> and Survival=<code>2,3,4</code> leads to a nice result of hexagon structures consuming nearby neighbours. These hexagons' outline become stable when there are no more neighbours. Initially their interior are chaotic but these too slowly stabilize to mostly hexagonal lattices (and small amounts of still or oscillating spots) at some point (as can be seen happening to the small hexagon at the <b>top center / 12 o'clock</b> in the animation above). The larger the hexagon, the more time it takes (sometimes 1000+ generations) to for its interior to stabilize fully.
+      If Birth and Survival rules were the only variables, there does not seem to be any combination that would fascilitate LIFE-like patterns in the hexagonal grid, but we found we could have another nice activity pattern with the rules Birth=<code>3,4</code> and Survival=<code>2,3,4</code>. <br /> <br /> Here hexagon structures are dominant and would consume their nearby neighbours. These hexagons' outline become stable when there are no more neighbours to consume. Initially, their interiors are chaotic but these too slowly stabilize to mostly hexagonal lattices (and small amounts of still or oscillating spots) at some point (as can be seen happening to the small hexagon at the <b>top center / 12 o'clock</b> in the animation above). The larger the hexagon, the more time it takes (sometimes 1000+ generations) to for its interior to stabilize fully, which does happen at some point. <br /> <br > This animation is sped up 2x to demonstrate this interior stabilization.
     </td>
     <td>
-      We were, however, able to cause more LIFE-like activity patterns to occur by breaking a rule. That is, in using three states (dead, blue <sub>(yellow in Joe's post)</sub>, and red) instead of two (dead and alive), and a certain combination of state-change rules (Birth=<code>4</code>, Survival<sub><sub>b->r</sub></sub>=<code>1,2,3,4,5</code>, Survival<sub><sub>r->r</sub></sub>=<code>1,2</code> and Survival<sub><sub>r->b</sub></sub>=<code>4</code>), as mentioned in <a href="https://www.quora.com/Are-there-variations-of-Conways-Game-of-Life-based-upon-a-triangular-or-hexagonal-grid">Joe Wezorek's post</a>
+      There is a means, however, to cause LIFE-like activity patterns in a hexagonal grid, that is, by breaking some rules (one of the criteria for a Cellular Automaton to be considered similar to Game of LIFE) where we would then have three possible cell states (dead, blue <sub>(yellow in Joe's post)</sub>, and red) instead of two (dead and alive) and a certain combination of state-change rules (Birth=<code>4</code>, Survival<sub><sub>b->r</sub></sub>=<code>1,2,3,4,5</code>, Survival<sub><sub>r->r</sub></sub>=<code>1,2</code> and Survival<sub><sub>r->b</sub></sub>=<code>4</code>), as mentioned in <a href="https://www.quora.com/Are-there-variations-of-Conways-Game-of-Life-based-upon-a-triangular-or-hexagonal-grid">Joe Wezorek's post</a>. Here, still lives (not in animation), oscillators and spaceships can be observed.
     </td>
   </tr>
 </table>
@@ -119,11 +119,12 @@
 | getLattice.m | Generates one of two types of checkerboard pattern, i.e., either starting with 1, or starting with 0, of size determined by the `height` and `width` values passed as numeric arguments (along with the single character argument, the lattice `type`) |
 | im2gif.m | Accepts as input arguments (1) a cell array of `im`s and (2) a string of the intended filename, to create a .gif image file (such as the ones used in the animations further below)|
 | fig2png.m | Accepts as its arguments (1) a figure handle and (2) a string of the intended filename, to create a .png image (not animated) of everything currently on the figure |
+| savedStates.mat | A MATLAB workspace file where we store several states that can be used as CA starting states such as in the case of Tri-grid and [Gosper & Simkin Guns](#initialization-or-loading-of-a-start-state) |
 
 ## Procedure in running each Cellular Automaton
 <sup>[Back to list of contents](#contents)</sup>
 
-In our main [`solutions.m`](solutions.m) script consists of 8 Cellular Automata runs, all done with the same procedure, as such:
+Our main [`solutions.m`](#relevant-files-descriptions) script consists of 8 Cellular Automata runs, all done with the same procedure, as such:
 
 ```MATLAB
 % Example: The Game of LIFE; Other Cellular Automata runs too follow the same format.
@@ -156,10 +157,10 @@ data(1,1:3) = {A, grid, label};
 <sup>[Back to list of contents](#contents)</sup>
 
 
-Before running a Cellular Automata "simulation", its must start with an existing state, in the form of a sparse matrix. For most of our examples in the [`solutions.m`](solutions.m) script, we have used the `sprand` function as such:
+Before running a Cellular Automata "simulation", it must start with an existing state, in the form of a sparse matrix where nonzero values must be exactly 1 (1 or 2 in `stepHex3`). For most of our examples in the [`solutions.m`](solutions.m) script, we have used the `sprand` function as such:
 
 ```MATLAB
-A = sprand(height, width, density)
+A = sprand(height, width, density) > 0
 ```
 
 where `A` is the start state to be assigned a value, and `sprand` used in this manner produces a sparse matrix of random numbers (0 to 1) at a certain amount of random positions determined by the density number.
@@ -171,7 +172,14 @@ where `A` is the start state to be assigned a value, and `sprand` used in this m
   0     0     0   0.3     0
 ```
 
-... though it will be in the form of a sparse matrix, meaning each non-zero element's row and column coordinates are kept in memory and the `0`s are ignored.
+... though it will be in the form of a sparse matrix, meaning only non-zero element with its row and column coordinates are kept in memory, while the `0`s are ignored.
+
+Evaluating the sparse matrix with a `> 0` operator returns the same pattern (i.e. nonzero positions) but where all nonzeros are converted to exactly 1.
+
+```
+  1     1     0     0     0
+  0     0     0     1     0
+```
 
 Alternatively, any saved state can be used too as the initial state, such as:
 
@@ -224,7 +232,7 @@ In each iteration up to N times, calls are made to
 ##### Plot Marker Configurations
 <sup>[Back to list of contents](#contents)</sup>
 
-It is best to make the plot markers distanced as closely to each other as possible without overlap. This is done by making it inversely proportional to the height of the matrix, i.e. have it be multiplied by `1/size(A,1)`.
+It is best to make the plot markers distanced as closely to each other as possible without overlap. This is done by setting the size to be inversely proportional to the height of the matrix, i.e. have it be multiplied by `1/size(A,1)`.
 
 ```MATLAB
   spy(A, '*k', baseMarkerSize/size(A,1)*markerScale);
@@ -233,7 +241,7 @@ It is best to make the plot markers distanced as closely to each other as possib
 ##### Aspect Ratios
 <sup>[Back to list of contents](#contents)</sup>
 
-To keep the figures plotted in proportion (one horizontal unit = one vertical unit) and not automatically stretch according to the current figure window dimensions, the `daspect` function is used
+To keep the figures plotted in proportion (so all adjacent cells look like they are equally distanced from any direction) and not automatically stretch according to the current figure window dimensions, the `daspect` function is used
 
 | Grid | Statement |
 | ---- | --------- |
@@ -264,9 +272,10 @@ The step function for the Game of Life
 ```MATLAB
 function A1 = stepLife(A0)
 
+  [h, w] = size(A0);
+
   ncAlive = nnz(A0);
 
-  [h, w] = size(A0);
   N = spalloc(h, w, ncAlive*4);
   A1 = spalloc(h, w, ncAlive);
 
@@ -296,7 +305,7 @@ A sparse matrix only takes as much storage as the amount of nonzero elements it 
 
 In other words, operations on sparse matrices become more efficient the lower the number of non-zero values.
 
-Additionally, the precise the amount of memory allocated for the amount of nonzero values a sparse array would have, the more efficient adding nonzero values to the already allocated memory would be.
+Additionally, the more precise the amount of memory allocated (soft maximum) for the amount of nonzero values a sparse array would have, the more efficient adding nonzero values to the already allocated memory would be, as adding more nonzero elements beyond the soft maximum takes more resources.
 
 `spalloc(h, w, nnz)` initializes an empty sparse matrix of size `h` by `w` with a soft capacity to hold `nnz` amount of nonzero values
 
@@ -305,7 +314,7 @@ N = spalloc(h, w, ncAlive*3);
 A1 = spalloc(h, w, ncAlive);
 ```
 
-N in any step function is the sparse matrix whose elements are the number of alive neighbours of the corresponding cells in A0.
+N in any [step function](#the-step-function) (not the N in [`solutions.m`](#relevant-files-descriptions)) is the sparse matrix whose elements are the number of alive neighbours of the corresponding cells in A0.
 
 A1 is the sparse matrix that would hold `1`s where there are alive cells in the next state
 
@@ -313,7 +322,7 @@ For the variable N, the final number of nonzeros would be the total number of in
 
 For the estimate for how many room to allocate, we just picked an arbitrary but reasonable (e.g. `3`) number that is less than the maximum number of neighbours for each cell to multiply with the amount of living cells `ncAlive`. The reason being that N should be proportional to the amount of living cells yet we acknowledge neighbouring positions of alive cells do overlap, hence not using too high of a multiplier for `ncAlive`.
 
-For the variable A1, we just picked exactly ncAlive to be the estimate as general world state does tend to stabilize in most Cellular Automata that we included in the solutions.m file.
+For the variable A1, we just picked exactly ncAlive to be the estimate, as in general, the world (all its cells') state does tend to stabilize in most Cellular Automata that we included in the [`solutions.m`](#relevant-files-descriptions) file.
 
 ##### Coordinates System
 <sup>[Back to list of contents](#contents)</sup>
@@ -330,7 +339,7 @@ Row\Col 1 2 3 4 5 6
       6 □ □ □ □ □ □
 ```
 
-... which is possible for a square grid. However for the triangular and hexagonal grid, it isn't as straightforward
+... which is possible for a square grid. However for the triangular and hexagonal grid, it is not as straightforward
 
 ###### Hexagonal Grid
 <sup>[Back to list of contents](#contents)</sup>
@@ -347,12 +356,12 @@ Row\Col 1 2 3 4 5 6
       6   ⬡   ⬡   ⬡
 ```
 
-... where in each row, every two positions are not used in the above manner, meaning one cell would horizontally be distanced two units apart, systematically i.e. only in their indices. However when plotting, the gaps have to be hidden, hence the high Y:X (aspect ratio)[#aspect-ratios] which scales down visual horizontal distances between cells relative to their vertical distances
+... where in each row, every two positions are skipped like in the above manner, meaning one cell would horizontally be distanced two units apart systematically i.e. only in their indices. However when plotting, the gaps have to be hidden, hence the high Y:X (aspect ratio)[#aspect-ratios] which scales down visual horizontal distances between cells relative to their vertical distances
 
 ###### Triangular Grid
 <sup>[Back to list of contents](#contents)</sup>
 
-After knowing the solution to implementing a hex grid, it was not difficult to come up with our own similar solution in implementing the triangular grid, i.e.
+After knowing the solution to implementing the [hex grid](#hexagonal-grid), it was not difficult to come up with our own similar solution in implementing the triangular grid, i.e.
 
 ```
 Row\Col 1 2 3 4 5 6
@@ -364,7 +373,9 @@ Row\Col 1 2 3 4 5 6
       6 ▲ ▼ ▲ ▼ ▲ ▼
 ```
 
-... where vertically as well as horizontally, the cells would alternate pointing directions (downwards vs. upwards pointing). Similar to in the hex grid, horizontally, the spacing between elements need to be squished, hence the slightly high Y:X (aspect ratio)[#aspect-ratios] (though not as high as for the hex grid)
+... where vertically as well as horizontally, the cells would alternate pointing directions (downwards vs. upwards pointing).
+
+Also, similar to in the [hex grid](#hexagonal-grid)'s case, horizontally, the spacing between elements need to be squished, hence the slightly high Y:X (aspect ratio)[#aspect-ratios] (though not as high as for the hex grid)
 
 ##### Usage of Matrix Operations
 <sup>[Back to list of contents](#contents)</sup>
@@ -372,7 +383,7 @@ Row\Col 1 2 3 4 5 6
 Snippet from the step function for Game of Life
 
 ```MATLAB
-% N's elements are the number of alive neighbours the cell in the same position in A0 has
+% N's elements are the number of alive neighbours the cell in the element's corresponding position in A0 has
 N += conv2(A0, [1 1 1;
                 1 0 1;
                 1 1 1], 'same');
@@ -390,7 +401,7 @@ A1 += (A0.*N == 2) + (A0.*N == 3);
 Let us assume we have the following matrices
 
 ```
- Current state     Number of alive neighbours of each cell in A
+ Current state     Number of alive neighbours of each cell in A0
 A0 = 0 0 0 0 0 0   N = 0 1 1 1 0 0
      0 0 1 0 0 0       0 1 1 2 1 0
      0 0 0 1 0 0       0 2 3 2 1 0
@@ -405,7 +416,7 @@ When the statement `A1 += (~A0.*N == 3);` is run, these occur:
 3. The resulting product is operated with the boolean operator == with 3 i.e. `~A0*N == 3`
 4. The result of the boolean operation is added to A1 i.e. `A1 += (~A0*N == 3)`
 
-How it looks like. (Not really as the matrices should be sparse and hence 0s do not really exist in memory)
+How it looks like: (Not literally, as the matrices would be sparse in which `0`s do not exist in memory)
 
 ```
                       Negation of A0
@@ -426,21 +437,21 @@ A0 = 0 0 0 0 0 0      ~A0 = 1 1 1 1 1 1
 
 ```
 
-A1 += (~A0.*N == 3) then results in 1 being added to position (3,3) in the matrix A1, which is akin to running the following code
+`A1 += (~A0.*N == 3)` then results in 1 being added to position (3,3) in the matrix A1, which is akin to running the following code
 
 ```MATLAB
 for r in 1:6
   for c in 1:6
-    if ~A0
+    if ~A0(r,c)
       if N==3
-        A1 = 1;
+        A1(r,c) = 1;
       end;
     end;
   end;
 end;
 ```
 
-which is not only a lot to read visually, but also computationally inefficient as the operation is done for rows*cols times, whereas in sparse matrix operations, some low level operations involving 0s are not even considered.
+which is not only quite a chunk to read, but is also computationally inefficient as the operation is done for rows*cols amount of iterations, whereas in sparse matrix operations, some low level operations involving 0s are not even considered.
 
 Thus the code 
   
@@ -482,7 +493,7 @@ N += conv2(A0, [1 1 1;
                 1 1 1], 'same');
 ```
 
-> A convolution is a type of matrix operation, consisting of a kernel (which is a small matrix of weights), that slides over input data performing element-wise multiplication with the part of the input it is on, then summing the results into an output. (Source: [Papers with Code](https://paperswithcode.com/method/convolution)
+> A convolution is a type of matrix operation, consisting of a **kernel** (which is a small matrix of weights), that slides over input data performing element-wise multiplication with the part of the input it is on, then summing the results into an output. (Source: [Papers with Code](https://paperswithcode.com/method/convolution)
 
 > `conv2(A,B)` returns the two-dimensional convolution of matrices A and B. (Source: [MATLAB docs on conv2](https://www.mathworks.com/help/matlab/ref/conv2.html#bvgtfv6))
 
@@ -601,7 +612,7 @@ It is used in filtering matrices in the case of hexagonal grid and triangle grid
 0 0 0 1 0 1 0
 ```
 
-However if it were a hexagonal grid, some of the 1s would be in positions that do not actually exist due to the [coordinates system](#hexagonal-grid).
+However if it were a hexagonal grid, some of the `1`s would be in positions that do not actually exist due to the [coordinates system](#hexagonal-grid).
 
 ```
 Row\Col 1 2 3 4 5 6
@@ -657,7 +668,6 @@ to be plotted by the first spy call as
 |    ▼|
 |     |
 |     |
-(not yet in [1.3 1] aspect ratio)
 ```
 
 then on the second spy call be plotted as
@@ -666,7 +676,6 @@ then on the second spy call be plotted as
 |    ▼|
 |    ▲|
 |  ▲  |
-(not yet in [1.3 1] aspect ratio)
 ```
 
 ##### Neighbourhood Computation
@@ -686,26 +695,39 @@ Snippet from `stepLife.m`/`stepSquare.m`
                   1 1 1], 'same');
 ```
 
-... which is straightforward A0 is directly used as argument to the conv2 along with the the 3x3 kernel that represents the eight positions adjacent to a cell in a square grid
+... which is straightforward A0 is directly used as argument to the `conv2` call along with the the 3x3 [kernel](#usage-of-conv2) that represents the eight positions adjacent to a cell in a square grid
 
 ___
 
 In `stepTriangle.m`
 
 ```MATLAB
-                                                    % ▲▼▲▼▲
-  N += conv2(A0.*getLattice('A', h, w), [1 1 1 1 1; % ▼▲v▲▼
-                                         1 1 0 1 1; %  ▼▲▼
+  N += conv2(A0.*getLattice('A', h, w), [1 1 1 1 1;
+                                         1 1 0 1 1;
                                          0 1 1 1 0], 'same');
-                                                    %  ▲▼▲
-  N += conv2(A0.*getLattice('B', h, w), [0 1 1 1 0; % ▲▼^▼▲
-                                         1 1 0 1 1; % ▼▲▼▲▼
+
+  N += conv2(A0.*getLattice('B', h, w), [0 1 1 1 0;
+                                         1 1 0 1 1;
                                          1 1 1 1 1], 'same');
 ```
 
-... two kernels are used, one for each type of triangle ▼ and ▲, whose neighbourhoods are computed in separate calls to conv2. Cell A0 is filtered by either types of checkered pattern generated by [`getLattice`](#usage-of-getlattice) so that only cells in downward pointing triangles are passed to the first conv2 call, while cells in upward pointing triangles are passed in the second call.
+... two [kernel](#usage-of-conv2)s are used, one for each type of triangle ▼ and ▲, whose neighbourhoods are computed in separate calls to conv2. Cell A0 is filtered by either types of checkered pattern generated by [`getLattice`](#usage-of-getlattice) so that only cell states in downward pointing triangles are passed to the first conv2 call, while cell states in upward pointing triangles are passed in the second call.
 
 In the triangular grid, cells considered neighbours are the ones touching not only on their edges, but also on their vertices, resulting in a total of 12 neighbours per cell
+
+```
+Neighbourhood of a downward pointing triangle
+  ▲ ▼ ▲ ▼ ▲
+  ▼ ▲ v ▲ ▼
+    ▼ ▲ ▼ 
+
+Neighbourhood of an upward pointing triangle
+    ▲ ▼ ▲
+  ▲ ▼ ^ ▼ ▲
+  ▼ ▲ ▼ ▲ ▼
+
+where v and ^ are the cells in question
+```
 ___
 
 `stepHex.m`
@@ -716,7 +738,23 @@ ___
                   0 1 0 1 0], 'same');
 ```
 
-... is similar to `stepLife.m`/`stepSquare.m` in that only one kernel is used. The staggered arrangement and horizontal distance is due to how the cells are arranged in the [coordinates system](#hexagonal-grid) used and which to be considered neighbours in a the grid
+... is similar to `stepLife.m`/`stepSquare.m` in that only one [kernel](#usage-of-conv2) is used. The staggered arrangement and horizontal distance is due to how the cells are arranged in the [coordinates system](#hexagonal-grid) used and the way neighbours are selected in a the grid
+
+```
+Row\Col 1 2 3 4 5 6 7
+      1 ⬡ - ⬡ - ⬡ - ⬡
+      2 - ⬡ - ⬡ - ⬡ -
+      3 ⬡ - ⬢ - ⬢ - ⬡
+      4 - ⬢ - ✡ - ⬢ -
+      5 ⬡ - ⬢ - ⬢ - ⬡
+      6 - ⬡ - ⬡ - ⬡ -
+      7 ⬡ - ⬡ - ⬡ - ⬡
+      
+✡ is the cell in question
+⬢ are cells adjacent to it
+- are unused positions in the coordinates system
+⬡ are other cels that are not neighbours
+```
 ___
 
 Snippet from `stepHex3.m`
@@ -731,7 +769,7 @@ Snippet from `stepHex3.m`
                        0 2 0 2 0], 'same');
 ```
 
-.. is similar to `stepHex.m` with the exception that red cells increment 2 to their neighbouring cells' N value.
+.. is similar to `stepHex.m` with the exception that red cells increment 2 to their neighbouring cells' N value and blue cells 1.
 
 ##### Next Cell State Computation
 <sup>[Back to list of contents](#contents)</sup>
@@ -743,14 +781,14 @@ From the original question:
 > 3. Any live cell with more than three live neighbours dies (overpopulation).
 > 4. Any dead cell with exactly three live neighbours becomes a live cell (reproduction).
 
-As the other Cellular Automata we have explored have the same format of rules but varying numbers (with the exception of `Hexagon3` in which cells have three possible states instead of two), these can be generalized into:
+As the other Cellular Automata we have explored have the same format of rules, but varying numbers, (with the exception of `Hexagon3` in which cells have three possible states instead of two), these rules can be generalized into:
 1. Any live cell that has $s \in sr$ amount of neighbours lives on to the next generation (survival)
 2. Any dead cell that has $b \in br$ amount of neighbours becomes a live cell (reproduction)
 3. Cells that do not meet any of the first two rules are assumed to be/stay dead.
 
 where
-- $sr$ is an array of numbers, which if a live cell's amount of live neighbours matches any of its elements, the cell would continue to live
-- $br$ is an array of numbers, which if a dead cell's amount of live neighbours matches any of its elements, the cell would become a live cell on the next generation
+- $sr$ is an array of numbers. If a live cell's amount of live neighbours matches any of this array's elements, the cell would continue to live
+- $br$ is an array of numbers. If a live cell's amount of live neighbours matches any of this array's elements, the cell would become a live cell on the next generation
 
 `stepSquare.m`, which accepts the birth $br$ and survival $sr$ rules as argument
 
@@ -774,9 +812,9 @@ where
   endfor
 ```
 
-How these [binary & boolean operations](#binary--boolean-operations) work in emulating conditional logic and iterating through individual elements, but more efficiently, as explained in a [previous section](#binary--boolean-operations).
+How these [binary & boolean operations](#binary--boolean-operations) work in emulating conditional logic and iterating through individual elements, but more efficiently, is explained in a [previous section](#binary--boolean-operations).
 
-For loop are still required, however, to loop through the arrays $sr$ and $br$.
+`For-loop`s are still required, however, to loop through the arrays $sr$ and $br$.
 
 The reason for singling out the conditions where n == 0 is that `A1 += (A0.*N == n)` or `A1 += (~A0.*N == n)` would not work as intended when 0 is in $sr$ or $br$ because `(A0.*N == n)` would have a value 1 wherever there is a dead cell and `(~A0.*N == n) would return 1 wherever there is a live cell, regardless of the value of N.
 
@@ -794,13 +832,41 @@ The code below
   endfor
 ```
 
-would work for most of the Cellular Automata variants but not for those with 0 in either their $sr$ or $br$ arrays (such as in [Life without Death](#animations-solution-output) due to the reasons mentioned in the previous paragraph.
+would work for most of the Cellular Automata variants but not for those with 0 in either their $sr$ or $br$ arrays (such as in [Life without Death](#animations-solution-output) which has $0 \leq sr \leq 8$) due to the reasons mentioned in the previous paragraph.
+
+___
+
+For specific Cell Automata with known set rules (not generalized), such as in the case of `stepLife.m`, `stepTriangle.m`, `stepHex.m` and `stepHex3.m`, the code can be written simpler (without the for loop) e.g. in `stepLife.m`:
+
+```MATLAB
+% Apply the birth rule
+A1 += (~A0.*N == 3);
+
+% Apply the survival rule
+A1 += (A0.*N == 2) + (A0.*N == 3);
+```
+
+which can be further simplified as a single A1 initialization, eliminating the need to call spalloc to initialize A1
+
+```MATLAB
+A1 = (~A0.*N == 3) + (A0.*N == 2) + (A0.*N == 3)
+```
+
+It is not as descriptive as the previous code block (a disadvantage in communicating the purpose of the code), but it would be read as:
+> Cell next state be 1 i.e. alive if either:
+> - (current state is 0/FALSY and has 3 neighbours) or
+> - (current state is 1/TRUTHY and has 2 neighbours) or
+> - (current state is 1/TRUTHY and has 3 neighbours)
+>
+> Otherwise cell next state be dead (which does not even need to be processed or stored in memory as the operands A0 and N are sparse matrices, thus saving precious computational time)
 
 ### Maintaining Data for Re-Displaying All Final States
 <sup>[Back to list of contents](#contents)</sup>
 
 ```MATLAB
-data(1,1:3) = {A, grid, label};
+data(n,1:3) = {A, grid, label};
+
+% where n is 1:8
 ```
 
 is written at every CA run after the for loops. This is to store in the data cell their:
